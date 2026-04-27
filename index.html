@@ -12,21 +12,22 @@
 <body>
     <div class="background-overlay"></div>
     
-    <header class="fixed-top header">
-        <h1 id="event-name">උත්සවයේ නම</h1>
-        <p id="event-subtext" class="subtext">මෙහි උප ශීර්ෂය දිස්වනු ඇත</p>
+    <header id="main-header" class="fixed-top header" style="display: none;">
+        <h1 id="event-name" class="event-title"></h1>
+        <p id="event-subtext" class="event-subtitle"></p>
     </header>
 
-    <main class="container">
-        <!-- Status Section (Countdown/Live) -->
-        <section id="status-section" class="card">
-            <div id="status-container">
-                <div class="loader">පූරණය වෙමින්...</div>
-            </div>
+    <main class="container" style="justify-content: center;">
+        <div id="loading-area">
+            <div class="spinner"></div>
+        </div>
+
+        <section id="status-section" class="card" style="display: none;">
+            <div id="status-container"></div>
         </section>
 
         <!-- Events Sections -->
-        <div id="events-main-view">
+        <div id="events-main-view" style="display: none;">
             <section id="ongoing-section" class="section-box">
                 <h2 class="badge-title">දැන් පැවැත්වේ</h2>
                 <div id="ongoing-events-list" class="list-centered"></div>
@@ -39,7 +40,8 @@
         </div>
     </main>
 
-    <footer class="fixed-bottom actions">
+    <!-- Fixed Footer -->
+    <footer id="main-footer" class="fixed-bottom footer" style="display: none;">
         <div class="footer-content">
             <button id="view-agenda" class="btn btn-outline">න්‍යාය පත්‍රය</button>
             <a id="whatsapp-link" href="#" target="_blank" class="btn btn-whatsapp">

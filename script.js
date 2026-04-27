@@ -1,267 +1,200 @@
 /**
- * EventWatch Logic
- * Minimalist script for managing event state and content.
+ * EventWatch - Production Version
+ * Highly optimized for stability with CSV data and cache-busting.
  */
 
 // --- CONFIGURATION ---
 const CONFIG = {
-    // These will be replaced with real CSV URLs later
-    flagsCsvUrl: null,
-    eventsCsvUrl: null,
-    refreshInterval: 20000, // 20 seconds
-    placeholderBg: 'assets/hero-bg.png'
+    flagsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTVeacJHWwlkad-jQIoR_u_ca1QpkeVoFjXueBikWGo_LPTRd0q4UzWWqqLfw2zqj8DiJ_Paq9EU9Dj/pub?gid=0&single=true&output=csv',
+    eventsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSEPoK2b6oFQad7-TbtmOjbN2X2SO_HD7qIXO-7hVBxQkzC7pKM_cpLdyLoDd5LS9knYl-YtqShSydw/pub?gid=0&single=true&output=csv',
+    refresh: 15000
 };
 
-// --- DUMMY DATA ---
-const dummyFlags = {
-    'Event name': 'සූර්ය මංගල්‍යය 2026',
-    'Event subtext': 'ගමේ හැමෝම එකතු වෙන අපේ දවස',
-    'Event start date': '2026-05-02',
-    'Event start time': '07:00:00',
-    'Event status': 'ON_GOING', // PENDING, ON_GOING, PAUSED_FOR_LUNCH, ENDED
-    'WhatsApp link': 'https://chat.whatsapp.com/test'
+let state = { 
+    flags: { 'EventName': 'පූරණය වෙමින්...', 'EventStatus': 'PENDING' }, 
+    events: [] 
 };
-
-const dummyEvents = [
-    { Event: 'කිරි ඉතිරවීම', Location: 'ප්‍රධාන ලිප අසල', Status: 'Finished' },
-    { Event: 'අවුරුදු කෑම මේසය', Location: 'භෝජන ශාලාව', Status: 'On Going' },
-    { Event: 'ජන ක්‍රීඩා ආරම්භය', Location: 'ක්‍රීඩා පිටිය', Status: 'Up Next' },
-    { Event: 'සංගීත ප්‍රසංගය', Location: 'ප්‍රධාන වේදිකාව', Status: 'Pending' },
-    { Event: 'සන් ක්‍රීඩා අංශය', Location: 'වෙල් යාය', Status: 'Pending' }
-];
-
-// --- APP STATE ---
-let currentState = {
-    flags: dummyFlags,
-    events: dummyEvents,
-    countdownTimer: null
-};
+let statusInterval = null;
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    init();
+    startDataLoop();
+    
+    // Modal Setup
+    const agendaModal = document.getElementById('agenda-modal');
+    const viewAgendaBtn = document.getElementById('view-agenda');
+    const closeBtn = document.querySelector('.close-modal');
+
+    if (viewAgendaBtn) viewAgendaBtn.onclick = () => { renderAgenda(); agendaModal.style.display = 'block'; };
+    if (closeBtn) closeBtn.onclick = () => agendaModal.style.display = 'none';
+    window.onclick = (e) => { if (e.target == agendaModal) agendaModal.style.display = 'none'; };
 });
 
-function init() {
-    renderContent();
-    setupEventListeners();
-    startDataLoop();
-}
-
-function setupEventListeners() {
-    const modal = document.getElementById('agenda-modal');
-    const btn = document.getElementById('view-agenda');
-    const span = document.querySelector('.close-modal');
-
-    btn.onclick = () => {
-        renderAgenda();
-        modal.style.display = "block";
-    };
-
-    span.onclick = () => {
-        modal.style.display = "none";
-    };
-
-    window.onclick = (event) => {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    };
-}
-
 // --- DATA FETCHING ---
+async function fetchData() {
+    try {
+        const t = Date.now();
+        const [fR, eR] = await Promise.all([
+            fetch(`${CONFIG.flagsUrl}&t=${t}`),
+            fetch(`${CONFIG.eventsUrl}&t=${t}`)
+        ]);
+        const [fC, eC] = await Promise.all([fR.text(), eR.text()]);
+        
+        state.flags = parseParams(parseCsv(fC));
+        state.events = parseCsv(eC);
+        
+        render();
+    } catch (e) { console.error('Sync Error:', e); }
+}
+
 function startDataLoop() {
-    // In a real scenario, this would fetch from CSV
-    // for now we just use dummy data
-    setInterval(() => {
-        console.log('Refreshing data...');
-        // fetchFromCsv();
-    }, CONFIG.refreshInterval);
+    fetchData();
+    setInterval(fetchData, CONFIG.refresh);
 }
 
 // --- RENDERING ---
-function renderContent() {
-    // Header Sync (Both Fixed and Ghost for perfect offset)
-    const { flags } = currentState;
-    const nameEls = [document.getElementById('event-name'), document.getElementById('event-name-ghost')];
-    const subtextEls = [document.getElementById('event-subtext'), document.getElementById('event-subtext-ghost')];
-    const whatsappLink = document.getElementById('whatsapp-link');
-
-    nameEls.forEach(el => { if (el) el.textContent = flags['Event name']; });
-    subtextEls.forEach(el => { if (el) el.textContent = flags['Event subtext']; });
-    whatsappLink.href = flags['WhatsApp link'];
-
-    // Status Section
-    renderStatus();
-
-    // Events List
-    renderEvents();
-}
-
-
-function renderStatus() {
-    const section = document.getElementById('status-section');
-    const container = document.getElementById('status-container');
-    const status = currentState.flags['Event status'];
+function render() {
+    const f = state.flags;
     
-    clearInterval(currentState.countdownTimer);
+    // Initial reveal transition
+    const loadingArea = document.getElementById('loading-area');
+    if (loadingArea) loadingArea.remove();
+    
+    const container = document.querySelector('.container');
+    if (container) container.style.justifyContent = 'flex-start';
+    
+    const header = document.getElementById('main-header');
+    if (header) header.style.display = 'block';
+    
+    const footer = document.getElementById('main-footer');
+    if (footer) footer.style.display = 'block';
 
+    const statusSection = document.getElementById('status-section');
+    if (statusSection) statusSection.style.display = 'block';
+
+    if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
+    if (f.EventSubtext) document.getElementById('event-subtext').textContent = f.EventSubtext;
+    
+    const rawStatus = f.EventStatus || f['Event status'] || '';
+    const status = rawStatus.toUpperCase().trim();
+    
     if (status === 'PENDING') {
         document.body.classList.remove('is-live');
-        section.style.display = 'block';
-        const targetDate = new Date(`${currentState.flags['Event start date']}T${currentState.flags['Event start time']}`);
-        container.innerHTML = `
-            <div class="status-label">උත්සවය ආරම්භ වීමට තව</div>
-            <div id="countdown" class="countdown"></div>
-        `;
-        startCountdown(targetDate);
-    } 
-    else {
-        document.body.classList.add('is-live');
-        // Hide the status section entirely when live or finished, 
-        // as the tabs/content now convey everything.
-        section.style.display = 'none';
-    }
-}
-
-function startCountdown(target) {
-    const countdownEl = document.getElementById('countdown');
-
-    const update = () => {
-        const now = new Date();
-        const diff = target - now;
-
-        if (diff <= 0) {
-            clearInterval(currentState.countdownTimer);
-            currentState.flags['Event status'] = 'ON_GOING';
-            renderStatus();
-            return;
+        document.getElementById('status-section').style.display = 'block';
+        
+        const date = f.EventStartDate || f['Event start date'] || '';
+        const time = f.EventStartTime || f['Event start time'] || '00:00:00';
+        const paddedTime = time.split(':').map(p => p.padStart(2, '0')).join(':');
+        
+        const target = new Date(`${date}T${paddedTime}`);
+        if (isNaN(target.getTime())) {
+            document.getElementById('status-container').innerHTML = '<div class="empty-state">දිනය නිවැරදි නැත</div>';
+        } else {
+            updateCountdown(target);
         }
+    } else {
+        document.body.classList.add('is-live');
+        document.getElementById('status-section').style.display = 'none';
+        if (statusInterval) clearInterval(statusInterval);
+    }
+    renderLists();
+}
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const mins = Math.floor((diff / 1000 / 60) % 60);
-        const secs = Math.floor((diff / 1000) % 60);
+function updateCountdown(target) {
+    const el = document.getElementById('status-container');
+    if (statusInterval) clearInterval(statusInterval);
+    
+    const tick = () => {
+        const diff = target - new Date();
+        if (diff <= 0) { state.flags.EventStatus = 'ON_GOING'; render(); return; }
+        
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff / 3600000) % 24);
+        const m = Math.floor((diff / 60000) % 60);
+        const s = Math.floor((diff / 1000) % 60);
 
-        countdownEl.innerHTML = `
-            <div class="countdown-item">
-                <span class="countdown-value">${days}</span>
-                <span class="countdown-label">දින</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-value">${hours}</span>
-                <span class="countdown-label">පැය</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-value">${mins}</span>
-                <span class="countdown-label">මිනිත්තු</span>
-            </div>
-            <div class="countdown-item">
-                <span class="countdown-value">${secs}</span>
-                <span class="countdown-label">තත්පර</span>
+        el.innerHTML = `
+            <div class="status-label">උත්සවය ආරම්භ වීමට තව</div>
+            <div id="countdown" class="countdown">
+                <div class="countdown-item"><span class="countdown-value">${d}</span><span class="countdown-label">දින</span></div>
+                <div class="countdown-item"><span class="countdown-value">${h}</span><span class="countdown-label">පැය</span></div>
+                <div class="countdown-item"><span class="countdown-value">${m}</span><span class="countdown-label">මිනිත්තු</span></div>
+                <div class="countdown-item"><span class="countdown-value">${s}</span><span class="countdown-label">තත්පර</span></div>
             </div>
         `;
     };
-
-    update();
-    currentState.countdownTimer = setInterval(update, 1000);
+    tick();
+    statusInterval = setInterval(tick, 1000);
 }
 
-function renderEvents() {
-    const ongoingSection = document.getElementById('ongoing-section');
-    const upcomingSection = document.getElementById('upcoming-section');
-    const ongoingList = document.getElementById('ongoing-events-list');
-    const upcomingList = document.getElementById('upcoming-events-list');
-    const status = currentState.flags['Event status'];
+function renderLists() {
+    const oList = document.getElementById('ongoing-events-list');
+    const uList = document.getElementById('upcoming-events-list');
+    const mainView = document.getElementById('events-main-view');
+    if (!oList || !uList || !mainView) return;
+    
+    oList.innerHTML = ''; uList.innerHTML = '';
+    
+    const rawStatus = state.flags.EventStatus || state.flags['Event status'] || '';
+    const status = rawStatus.toUpperCase().trim();
 
-    ongoingList.innerHTML = '';
-    upcomingList.innerHTML = '';
-
-    // Hide events if pending
     if (status === 'PENDING') {
-        ongoingSection.style.display = 'none';
-        upcomingSection.style.display = 'none';
+        mainView.style.display = 'none';
         return;
-    } else {
-        ongoingSection.style.display = 'block';
-        upcomingSection.style.display = 'block';
-    }
+    } 
+    
+    mainView.style.display = 'block';
 
-    const statusMap = {
-        'Pending': 'මීලගට',
-        'Up Next': 'මීලගට',
-        'On Going': 'දැන් පැවැත්වේ',
-        'Finished': 'නිම විය'
-    };
-
-    currentState.events.forEach(event => {
+    state.events.forEach(e => {
         const item = document.createElement('div');
         item.className = 'event-item';
-        item.innerHTML = `
-            <div class="event-info">
-                <h3>${event.Event}</h3>
-                <p>${event.Location}</p>
-            </div>
-        `;
-
-        const s = event.Status.toLowerCase().trim();
-        if (s === 'on going') {
-            ongoingList.appendChild(item);
-        } else if (s === 'pending' || s === 'up next') {
-            upcomingList.appendChild(item);
-        }
+        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${e.Location || e.location}</p></div>`;
+        
+        const s = (e.Status || e.status || '').toLowerCase().trim();
+        if (s === 'on going') oList.appendChild(item);
+        else if (s === 'up next') uList.appendChild(item);
     });
 
-    // Ensure sections are visible if we started the live phase
+    if (!oList.children.length) oList.innerHTML = '<div class="empty-state">දැනට පැවැත්වෙන සිදුවීම් කිසිවක් නැත</div>';
+    if (!uList.children.length) uList.innerHTML = '<div class="empty-state">මීලගට සැලසුම් කළ සිදුවීම් කිසිවක් නැත</div>';
 }
 
 function renderAgenda() {
-    const content = document.getElementById('agenda-content');
-
-    const statusMap = {
-        'Pending': 'මීලගට',
-        'Up Next': 'මීලගට',
-        'On Going': 'දැන් පැවැත්වේ',
-        'Finished': 'නිම විය'
-    };
-
-    content.innerHTML = `
-        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-            <thead>
-                <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                    <th style="padding: 0.5rem;">සිදුවීම</th>
-                    <th style="padding: 0.5rem; text-align: right;">තත්ත්වය</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${currentState.events.map(e => `
-                    <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 1rem 0.5rem;">
-                            <div style="font-weight: 600;">${e.Event}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${e.Location}</div>
-                        </td>
-                        <td style="padding: 1rem 0.5rem; text-align: right; vertical-align: middle;">
-                            <span class="event-status status-${e.Status.toLowerCase().replace(' ', '-')}">
-                                ${statusMap[e.Status] || e.Status}
-                            </span>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    const c = document.getElementById('agenda-content'); if (!c) return;
+    const m = { 'Pending': 'මීලගට', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
+    c.innerHTML = `<div class="list-centered">${state.events.map(e => {
+        const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
+        return `
+            <div class="event-item">
+                <div class="event-info">
+                    <h3>${e.Event || e.event}</h3>
+                    <p>${e.Location || e.location} <span class="event-status status-${s}">${m[e.Status || e.status] || (e.Status || e.status)}</span></p>
+                </div>
+            </div>`;
+    }).join('')}</div>`;
 }
 
 // --- UTILS ---
 function parseCsv(text) {
-    // Simple CSV parser
-    const lines = text.split('\n');
-    const headers = lines[0].split(',');
+    if (!text) return [];
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim());
     return lines.slice(1).map(line => {
-        const values = line.split(',');
-        return headers.reduce((obj, header, index) => {
-            obj[header.trim()] = values[index]?.trim();
-            return obj;
-        }, {});
+        const values = line.split(',').map(v => v.trim());
+        return headers.reduce((obj, h, i) => { obj[h] = values[i]; return obj; }, {});
     });
+}
+
+function parseParams(data) {
+    const flags = {};
+    data.forEach(row => {
+        const keys = Object.keys(row);
+        if (keys.length >= 2) {
+            const k = row[keys[0]], v = row[keys[1]];
+            if (k) flags[k.toString().trim()] = v;
+        }
+    });
+    return flags;
 }
