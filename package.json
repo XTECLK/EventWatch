@@ -1,0 +1,13 @@
+{
+  "name": "eventwatch",
+  "version": "1.0.0",
+  "description": "Static website for EventWatch",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
