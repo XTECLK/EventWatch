@@ -33,10 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- DATA FETCHING ---
 async function fetchData() {
     try {
-        const t = Date.now();
+        const bust = (url) => url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
         const [fR, eR] = await Promise.all([
-            fetch(`${CONFIG.flagsUrl}&t=${t}`),
-            fetch(`${CONFIG.eventsUrl}&t=${t}`)
+            fetch(bust(CONFIG.flagsUrl)),
+            fetch(bust(CONFIG.eventsUrl))
         ]);
         const [fC, eC] = await Promise.all([fR.text(), eR.text()]);
         
