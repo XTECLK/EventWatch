@@ -20,26 +20,22 @@ let statusInterval = null;
 document.addEventListener('DOMContentLoaded', () => {
     startDataLoop();
     
-    // View Navigation
+    // View Navigation (Modal Mode)
+    const agendaModal = document.getElementById('agenda-modal');
     const viewAgendaBtn = document.getElementById('view-agenda');
-    const backBtn = document.getElementById('back-to-main');
-    const mainView = document.getElementById('main-view');
-    const agendaView = document.getElementById('agenda-view');
-    const mainHeader = document.getElementById('main-header');
+    const closeModalBtn = document.querySelector('.close-modal');
 
     if (viewAgendaBtn) viewAgendaBtn.onclick = () => {
         renderAgenda();
-        mainView.style.display = 'none';
-        mainHeader.style.display = 'none';
-        agendaView.style.display = 'block';
-        window.scrollTo(0,0);
+        agendaModal.style.display = 'flex';
     };
 
-    if (backBtn) backBtn.onclick = () => {
-        agendaView.style.display = 'none';
-        mainView.style.display = 'block';
-        mainHeader.style.display = 'block';
-        window.scrollTo(0,0);
+    if (closeModalBtn) closeModalBtn.onclick = () => {
+        agendaModal.style.display = 'none';
+    };
+
+    window.onclick = (e) => {
+        if (e.target == agendaModal) agendaModal.style.display = 'none';
     };
 });
 
@@ -69,7 +65,7 @@ function startDataLoop() {
 function render() {
     const f = state.flags;
     
-    // Initial reveal transition (only if loader exists)
+    // Initial reveal transition
     const loader = document.getElementById('loading-area');
     if (loader) {
         loader.remove();
@@ -77,13 +73,6 @@ function render() {
         document.getElementById('main-header').style.display = 'block';
         document.getElementById('main-view').style.display = 'block';
         document.getElementById('main-footer').style.display = 'block';
-    }
-    
-    // Only update main header if we aren't in agenda view
-    const isAgenda = document.getElementById('agenda-view').style.display === 'block';
-    if (!isAgenda) {
-        document.getElementById('main-header').style.display = 'block';
-        document.getElementById('main-view').style.display = 'block';
     }
 
     if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
@@ -162,7 +151,7 @@ function renderLists() {
     state.events.forEach(e => {
         const item = document.createElement('div');
         item.className = 'event-item';
-        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${e.Location || e.location}</p></div>`;
+        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3></div>`;
         
         const s = (e.Status || e.status || '').toLowerCase().trim();
         if (s === 'on going') oList.appendChild(item);
@@ -175,14 +164,16 @@ function renderLists() {
 
 function renderAgenda() {
     const c = document.getElementById('agenda-content'); if (!c) return;
-    const m = { 'Pending': 'මීලගට', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
+    const m = { 'Pending': 'පසුවට', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
     c.innerHTML = `<div class="list-centered">${state.events.map(e => {
         const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
         return `
             <div class="event-item">
                 <div class="event-info">
-                    <h3>${e.Event || e.event}</h3>
-                    <p>${e.Location || e.location} <span class="event-status status-${s}">${m[e.Status || e.status] || (e.Status || e.status)}</span></p>
+                    <div class="agenda-item-header">
+                        <h3>${e.Event || e.event}</h3>
+                        <span class="event-status status-${s}">${m[e.Status || e.status] || (e.Status || e.status)}</span>
+                    </div>
                 </div>
             </div>`;
     }).join('')}</div>`;
