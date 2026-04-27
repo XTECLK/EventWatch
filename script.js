@@ -164,7 +164,7 @@ function renderLists() {
 
 function renderAgenda() {
     const c = document.getElementById('agenda-content'); if (!c) return;
-    const m = { 'Pending': 'පසුවට', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
+    const m = { 'Pending': 'පැවැත්වීමට නියමිත', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
     c.innerHTML = `<div class="list-centered">${state.events.map(e => {
         const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
         return `
