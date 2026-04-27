@@ -1,11 +1,11 @@
 :root {
-    --primary: #e11d48; /* Traditional Red */
-    --secondary: #f59e0b; /* Golden Amber */
-    --background: #ffffff;
-    --card-bg: rgba(255, 255, 255, 0.9);
+    --primary: #e11d48;
+    --secondary: #f59e0b;
+    --whatsapp: #25d366;
     --text-main: #18181b;
     --text-muted: #71717a;
-    --glass-border: rgba(0, 0, 0, 0.05);
+    --bg-glass: rgba(255, 255, 255, 0.8);
+    --border-glass: rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -16,259 +16,239 @@
 
 body {
     font-family: 'Noto Sans Sinhala', 'Outfit', sans-serif;
-    background-color: #f8fafc;
     color: var(--text-main);
-    line-height: 1.6;
-    overflow-x: hidden;
+    line-height: 1.5;
+    background-color: #f8fafc;
     min-height: 100vh;
 }
 
-/* Background Image styling */
+/* Background Illustration - Full Page Blur */
 .background-overlay {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 800px;
     height: 100%;
-    background-image: url('assets/hero-bg.png');
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    opacity: 0.15;
-    z-index: -1;
+    background: url('assets/hero-bg.png') center/cover no-repeat;
+    z-index: -2;
 }
 
+/* Base Container */
 .container {
     max-width: 600px;
     margin: 0 auto;
-    padding: 2rem 1.5rem;
+    padding: 10rem 1.25rem 8rem; /* Header/Footer clearances */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
-    min-height: 100vh;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
 }
 
-.header {
+/* Live Mode: Whole Content Glass */
+body.is-live .container {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid var(--border-glass);
+    border-right: 1px solid var(--border-glass);
+}
+
+/* Header & Footer (Fixed) */
+.fixed-top, .fixed-bottom {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-glass);
     text-align: center;
+    padding: 1rem 1.25rem;
+}
+
+.fixed-bottom {
+    top: auto;
+    bottom: 0;
+    border-bottom: none;
+    border-top: 1px solid var(--border-glass);
 }
 
 .header h1 {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
-    background: linear-gradient(to right, #e11d48, #f59e0b);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text; /* Added for compatibility */
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.4rem; /* Tightened gap */
 }
 
 .subtext {
+    font-size: 0.8rem; /* Refined smaller size */
+    font-weight: 700;
     color: var(--text-muted);
-    font-size: 1.1rem;
 }
 
+/* Cards & Sections */
 .card {
-    background: var(--card-bg);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
+    background: white;
     padding: 2rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-}
-
-/* Countdown / Status Styles */
-#status-container {
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     text-align: center;
 }
 
-.status-label {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--secondary);
-    margin-bottom: 1rem;
+.section-box {
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
-.live-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    padding: 0.5rem 1rem;
+.badge-title {
+    display: inline-block;
+    background: var(--secondary);
+    color: white;
+    padding: 0.35rem 1.25rem;
     border-radius: 99px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
 }
 
-.live-badge .dot {
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-}
-
-.countdown {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-}
-
-.countdown-item {
+/* Centered Lists */
+.list-centered {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.countdown-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    font-family: 'Outfit', sans-serif;
-}
-
-.countdown-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-/* Events List */
-.events-container h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
+    gap: 0;
 }
 
 .event-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--glass-border);
+    width: 100%;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .event-item:last-child {
     border-bottom: none;
 }
 
-.event-info h3 {
-    font-size: 1rem;
-    font-weight: 500;
+.event-item h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
 }
 
-.event-info p {
+.event-item p {
     font-size: 0.85rem;
+    font-weight: 600;
     color: var(--text-muted);
 }
 
-.event-status {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--secondary);
-}
-
-/* Actions */
-.actions {
+/* Buttons */
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
     display: flex;
-    flex-direction: column;
     gap: 1rem;
-    margin-top: auto;
-    padding-bottom: 2rem;
 }
 
 .btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 14px;
+    font-weight: 800; /* Unified Bold */
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
-    border-radius: 16px;
-    font-weight: 600;
+    gap: 0.5rem;
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1rem; /* Matched font size */
+    font-family: inherit;
 }
 
-.btn-primary {
-    background: #25d366; /* WhatsApp Green */
-    color: #fff;
+.btn-outline {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: var(--text-main);
+}
+
+.btn-whatsapp {
+    background: var(--whatsapp);
+    color: white;
     border: none;
 }
 
-.btn-secondary {
-    background: #fff;
-    color: var(--text-main);
-    border: 1px solid #e2e8f0;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+.btn:active {
+    transform: scale(0.98);
 }
 
 /* Modal */
 .modal {
     display: none;
     position: fixed;
-    z-index: 100;
-    left: 0;
+    z-index: 2000;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    padding: 1.25rem;
 }
 
 .modal-content {
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
+    background: white;
+    padding: 2.5rem;
+    border-radius: 24px;
     max-width: 500px;
+    margin: 5vh auto;
+    position: relative;
     max-height: 80vh;
     overflow-y: auto;
 }
 
 .close-modal {
     position: absolute;
-    top: 1.5rem;
+    top: 1rem;
     right: 1.5rem;
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-muted);
 }
 
-/* Animations */
-.fade-in {
-    animation: fadeIn 0.8s ease-out forwards;
+/* Status Badges */
+.live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.dot {
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.5; }
-    100% { transform: scale(1); opacity: 1; }
+@keyframes blink {
+    50% { opacity: 0.3; }
 }
 
 @media (max-width: 480px) {
-    .container {
-        padding: 1.5rem 1rem;
-    }
-    .header h1 {
-        font-size: 2rem;
-    }
-    .countdown-value {
-        font-size: 1.8rem;
-    }
+    .container { padding-top: 8rem; }
+    .header h1 { font-size: 1.5rem; }
 }

@@ -6,7 +6,7 @@
 // --- CONFIGURATION ---
 const CONFIG = {
     // These will be replaced with real CSV URLs later
-    flagsCsvUrl: null, 
+    flagsCsvUrl: null,
     eventsCsvUrl: null,
     refreshInterval: 20000, // 20 seconds
     placeholderBg: 'assets/hero-bg.png'
@@ -18,7 +18,7 @@ const dummyFlags = {
     'Event subtext': 'ගමේ හැමෝම එකතු වෙන අපේ දවස',
     'Event start date': '2026-05-02',
     'Event start time': '07:00:00',
-    'Event status': 'PENDING', // PENDING, ON_GOING, PAUSED_FOR_LUNCH, ENDED
+    'Event status': 'ON_GOING', // PENDING, ON_GOING, PAUSED_FOR_LUNCH, ENDED
     'WhatsApp link': 'https://chat.whatsapp.com/test'
 };
 
@@ -81,12 +81,15 @@ function startDataLoop() {
 
 // --- RENDERING ---
 function renderContent() {
+    // Header Sync (Both Fixed and Ghost for perfect offset)
     const { flags } = currentState;
+    const nameEls = [document.getElementById('event-name'), document.getElementById('event-name-ghost')];
+    const subtextEls = [document.getElementById('event-subtext'), document.getElementById('event-subtext-ghost')];
+    const whatsappLink = document.getElementById('whatsapp-link');
 
-    // Header
-    document.getElementById('event-name').textContent = flags['Event name'];
-    document.getElementById('event-subtext').textContent = flags['Event subtext'];
-    document.getElementById('whatsapp-link').href = flags['WhatsApp link'];
+    nameEls.forEach(el => { if (el) el.textContent = flags['Event name']; });
+    subtextEls.forEach(el => { if (el) el.textContent = flags['Event subtext']; });
+    whatsappLink.href = flags['WhatsApp link'];
 
     // Status Section
     renderStatus();
@@ -95,13 +98,17 @@ function renderContent() {
     renderEvents();
 }
 
+
 function renderStatus() {
+    const section = document.getElementById('status-section');
     const container = document.getElementById('status-container');
     const status = currentState.flags['Event status'];
     
     clearInterval(currentState.countdownTimer);
 
     if (status === 'PENDING') {
+        document.body.classList.remove('is-live');
+        section.style.display = 'block';
         const targetDate = new Date(`${currentState.flags['Event start date']}T${currentState.flags['Event start time']}`);
         container.innerHTML = `
             <div class="status-label">උත්සවය ආරම්භ වීමට තව</div>
@@ -109,33 +116,17 @@ function renderStatus() {
         `;
         startCountdown(targetDate);
     } 
-    else if (status === 'ON_GOING') {
-        container.innerHTML = `
-            <div class="live-badge"><span class="dot"></span> සජීවීව</div>
-            <h2 style="font-size: 1.5rem;">සිදුවීම් දැනට ක්‍රියාත්මකයි</h2>
-            <p style="color: var(--text-muted); margin-top: 0.5rem;">අළුත්ම යාවත්කාලීන සඳහා රැඳී සිටින්න</p>
-        `;
-    }
-    else if (status === 'PAUSED_FOR_LUNCH') {
-        container.innerHTML = `
-            <div class="live-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
-                විවේක කාලය
-            </div>
-            <h2 style="font-size: 1.5rem;">දවල් ආහාරය සඳහා විරාමය</h2>
-            <p style="color: var(--text-muted); margin-top: 0.5rem;">මඳ වේලාවකින් නැවත ආරම්භ වේ</p>
-        `;
-    }
-    else if (status === 'ENDED') {
-        container.innerHTML = `
-            <h2 style="font-size: 1.5rem;">උත්සවය නිම විය</h2>
-            <p style="color: var(--text-muted); margin-top: 0.5rem;">සම්බන්ධ වූ සැමට ස්තූතියි!</p>
-        `;
+    else {
+        document.body.classList.add('is-live');
+        // Hide the status section entirely when live or finished, 
+        // as the tabs/content now convey everything.
+        section.style.display = 'none';
     }
 }
 
 function startCountdown(target) {
     const countdownEl = document.getElementById('countdown');
-    
+
     const update = () => {
         const now = new Date();
         const diff = target - now;
@@ -177,16 +168,29 @@ function startCountdown(target) {
 }
 
 function renderEvents() {
+    const ongoingSection = document.getElementById('ongoing-section');
+    const upcomingSection = document.getElementById('upcoming-section');
     const ongoingList = document.getElementById('ongoing-events-list');
     const upcomingList = document.getElementById('upcoming-events-list');
-    
+    const status = currentState.flags['Event status'];
+
     ongoingList.innerHTML = '';
     upcomingList.innerHTML = '';
 
+    // Hide events if pending
+    if (status === 'PENDING') {
+        ongoingSection.style.display = 'none';
+        upcomingSection.style.display = 'none';
+        return;
+    } else {
+        ongoingSection.style.display = 'block';
+        upcomingSection.style.display = 'block';
+    }
+
     const statusMap = {
-        'Pending': 'ඉදිරියට',
-        'Up Next': 'මීළඟට',
-        'On Going': 'දැනට පැවැත්වේ',
+        'Pending': 'මීලගට',
+        'Up Next': 'මීලගට',
+        'On Going': 'දැන් පැවැත්වේ',
         'Finished': 'නිම විය'
     };
 
@@ -198,37 +202,48 @@ function renderEvents() {
                 <h3>${event.Event}</h3>
                 <p>${event.Location}</p>
             </div>
-            <div class="event-status status-${event.Status.toLowerCase().replace(' ', '-')}">${statusMap[event.Event] || statusMap[event.Status] || event.Status}</div>
         `;
 
-        if (event.Status === 'On Going') {
+        const s = event.Status.toLowerCase().trim();
+        if (s === 'on going') {
             ongoingList.appendChild(item);
-        } else if (event.Status === 'Pending' || event.Status === 'Up Next') {
+        } else if (s === 'pending' || s === 'up next') {
             upcomingList.appendChild(item);
         }
     });
 
-    // Hide sections if empty
-    document.getElementById('ongoing-section').style.display = ongoingList.children.length > 0 ? 'block' : 'none';
+    // Ensure sections are visible if we started the live phase
 }
 
 function renderAgenda() {
     const content = document.getElementById('agenda-content');
+
+    const statusMap = {
+        'Pending': 'මීලගට',
+        'Up Next': 'මීලගට',
+        'On Going': 'දැන් පැවැත්වේ',
+        'Finished': 'නිම විය'
+    };
+
     content.innerHTML = `
         <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
             <thead>
                 <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
-                    <th style="padding: 0.5rem;">වේලාව</th>
                     <th style="padding: 0.5rem;">සිදුවීම</th>
+                    <th style="padding: 0.5rem; text-align: right;">තත්ත්වය</th>
                 </tr>
             </thead>
             <tbody>
                 ${currentState.events.map(e => `
                     <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 0.75rem; font-size: 0.9rem;">${e.Status === 'සම්පූර්ණයි' ? 'නිම විය' : 'ඉදිරියට'}</td>
-                        <td style="padding: 0.75rem;">
-                            <div style="font-weight: 500;">${e.Event}</div>
+                        <td style="padding: 1rem 0.5rem;">
+                            <div style="font-weight: 600;">${e.Event}</div>
                             <div style="font-size: 0.8rem; color: var(--text-muted);">${e.Location}</div>
+                        </td>
+                        <td style="padding: 1rem 0.5rem; text-align: right; vertical-align: middle;">
+                            <span class="event-status status-${e.Status.toLowerCase().replace(' ', '-')}">
+                                ${statusMap[e.Status] || e.Status}
+                            </span>
                         </td>
                     </tr>
                 `).join('')}
