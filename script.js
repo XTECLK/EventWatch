@@ -20,14 +20,27 @@ let statusInterval = null;
 document.addEventListener('DOMContentLoaded', () => {
     startDataLoop();
     
-    // Modal Setup
-    const agendaModal = document.getElementById('agenda-modal');
+    // View Navigation
     const viewAgendaBtn = document.getElementById('view-agenda');
-    const closeBtn = document.querySelector('.close-modal');
+    const backBtn = document.getElementById('back-to-main');
+    const mainView = document.getElementById('main-view');
+    const agendaView = document.getElementById('agenda-view');
+    const mainHeader = document.getElementById('main-header');
 
-    if (viewAgendaBtn) viewAgendaBtn.onclick = () => { renderAgenda(); agendaModal.style.display = 'block'; };
-    if (closeBtn) closeBtn.onclick = () => agendaModal.style.display = 'none';
-    window.onclick = (e) => { if (e.target == agendaModal) agendaModal.style.display = 'none'; };
+    if (viewAgendaBtn) viewAgendaBtn.onclick = () => {
+        renderAgenda();
+        mainView.style.display = 'none';
+        mainHeader.style.display = 'none';
+        agendaView.style.display = 'block';
+        window.scrollTo(0,0);
+    };
+
+    if (backBtn) backBtn.onclick = () => {
+        agendaView.style.display = 'none';
+        mainView.style.display = 'block';
+        mainHeader.style.display = 'block';
+        window.scrollTo(0,0);
+    };
 });
 
 // --- DATA FETCHING ---
@@ -56,21 +69,22 @@ function startDataLoop() {
 function render() {
     const f = state.flags;
     
-    // Initial reveal transition
-    const loadingArea = document.getElementById('loading-area');
-    if (loadingArea) loadingArea.remove();
+    // Initial reveal transition (only if loader exists)
+    const loader = document.getElementById('loading-area');
+    if (loader) {
+        loader.remove();
+        document.querySelector('.container').style.justifyContent = 'flex-start';
+        document.getElementById('main-header').style.display = 'block';
+        document.getElementById('main-view').style.display = 'block';
+        document.getElementById('main-footer').style.display = 'block';
+    }
     
-    const container = document.querySelector('.container');
-    if (container) container.style.justifyContent = 'flex-start';
-    
-    const header = document.getElementById('main-header');
-    if (header) header.style.display = 'block';
-    
-    const footer = document.getElementById('main-footer');
-    if (footer) footer.style.display = 'block';
-
-    const statusSection = document.getElementById('status-section');
-    if (statusSection) statusSection.style.display = 'block';
+    // Only update main header if we aren't in agenda view
+    const isAgenda = document.getElementById('agenda-view').style.display === 'block';
+    if (!isAgenda) {
+        document.getElementById('main-header').style.display = 'block';
+        document.getElementById('main-view').style.display = 'block';
+    }
 
     if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
     if (f.EventSubtext) document.getElementById('event-subtext').textContent = f.EventSubtext;

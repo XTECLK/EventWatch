@@ -18,25 +18,37 @@
     </header>
 
     <main class="container" style="justify-content: center;">
+        <!-- Loading Area -->
         <div id="loading-area">
             <div class="spinner"></div>
         </div>
 
-        <section id="status-section" class="card" style="display: none;">
-            <div id="status-container"></div>
-        </section>
-
-        <!-- Events Sections -->
-        <div id="events-main-view" style="display: none;">
-            <section id="ongoing-section" class="section-box">
-                <h2 class="badge-title">දැන් පැවැත්වේ</h2>
-                <div id="ongoing-events-list" class="list-centered"></div>
+        <!-- Main Dashboard View -->
+        <div id="main-view" style="display: none; width: 100%;">
+            <section id="status-section" class="card">
+                <div id="status-container"></div>
             </section>
 
-            <section id="upcoming-section" class="section-box">
-                <h2 class="badge-title">මීලගට</h2>
-                <div id="upcoming-events-list" class="list-centered"></div>
-            </section>
+            <div id="events-main-view">
+                <section id="ongoing-section" class="section-box">
+                    <h2 class="badge-title">දැන් පැවැත්වේ</h2>
+                    <div id="ongoing-events-list" class="list-centered"></div>
+                </section>
+
+                <section id="upcoming-section" class="section-box">
+                    <h2 class="badge-title">මීලගට</h2>
+                    <div id="upcoming-events-list" class="list-centered"></div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Full Agenda Page View -->
+        <div id="agenda-view" style="display: none; width: 100%;">
+            <div class="view-header">
+                <button id="back-to-main" class="btn-back">← ආපසු</button>
+                <h2 class="view-title">සම්පූර්ණ න්‍යාය පත්‍රය</h2>
+            </div>
+            <div id="agenda-content"></div>
         </div>
     </main>
 
@@ -50,15 +62,6 @@
             </a>
         </div>
     </footer>
-
-    <!-- Modal for Agenda -->
-    <div id="agenda-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 style="margin-bottom: 1.5rem;">සම්පූර්ණ න්‍යාය පත්‍රය</h2>
-            <div id="agenda-content"></div>
-        </div>
-    </div>
 
     <script src="script.js"></script>
 </body>
