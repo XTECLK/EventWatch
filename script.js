@@ -151,7 +151,9 @@ function renderLists() {
     state.events.forEach(e => {
         const item = document.createElement('div');
         item.className = 'event-item';
-        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3></div>`;
+        const loc = (e.Location || e.location || '').trim();
+        const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
+        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${locationText}</p></div>`;
         
         const s = (e.Status || e.status || '').toLowerCase().trim();
         if (s === 'on going') oList.appendChild(item);
@@ -167,11 +169,14 @@ function renderAgenda() {
     const m = { 'Pending': 'පැවැත්වීමට නියමිත', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
     c.innerHTML = `<div class="list-centered">${state.events.map(e => {
         const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
+        const loc = (e.Location || e.location || '').trim();
+        const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
         return `
             <div class="event-item">
                 <div class="event-info">
-                    <div class="agenda-item-header">
-                        <h3>${e.Event || e.event}</h3>
+                    <h3>${e.Event || e.event}</h3>
+                    <div class="location-text-row">${locationText}</div>
+                    <div class="agenda-status-row">
                         <span class="event-status status-${s}">${m[e.Status || e.status] || (e.Status || e.status)}</span>
                     </div>
                 </div>
