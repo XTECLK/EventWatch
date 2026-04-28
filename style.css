@@ -306,6 +306,12 @@ body {
     border: 1px solid rgba(107, 114, 128, 0.2);
 }
 
+.status-cancelled {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
 /* Buttons */
 .footer-content {
     max-width: 600px;

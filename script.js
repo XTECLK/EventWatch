@@ -83,6 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (places >= 2) resText += `\n🥈 *දෙවන ස්ථානය:* ${second}`;
                 if (places >= 3) resText += `\n🥉 *තෙවන ස්ථානය:* ${third}`;
             }
+        } else if (s === 'cancelled') {
+            resText = `🚫 *තරගය අවලංගු කර ඇත:*\n\n🏃 *තරගය:* ${name}\n\nමෙම තරගය අවලංගු කර ඇති බව කරුණාවෙන් සලකන්න.`;
         } else {
             resText = `📢 *දැනුම්දීමයි:*\n\n🏃 *තරගය:* ${name}\n📍 *ස්ථානය:* ${loc}\n\nකරුණාකර අදාල තරගකරුවන් වහාම වාර්තා කරන්න.`;
         }
@@ -243,7 +245,7 @@ function renderLists() {
 
 function renderAgenda() {
     const c = document.getElementById('agenda-content'); if (!c) return;
-    const m = { 'Pending': 'පැවැත්වීමට නියමිත', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය' };
+    const m = { 'Pending': 'පැවැත්වීමට නියමිත', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය', 'Cancelled': 'අවලංගුයි' };
     c.innerHTML = `<div class="list-centered">${state.events.map((e, idx) => {
         const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
         const loc = (e.Location || e.location || '').trim();
