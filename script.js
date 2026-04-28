@@ -27,6 +27,21 @@ let activeBroadcastEvent = null;
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('fullscreen') === 'true') {
+        const fsOverlay = document.getElementById('fullscreen-overlay');
+        const fsBtn = document.getElementById('enable-fullscreen-btn');
+        if (fsOverlay && fsBtn) {
+            fsOverlay.style.display = 'flex';
+            fsBtn.onclick = () => {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+                fsOverlay.style.display = 'none';
+            };
+        }
+    }
+
     startDataLoop();
 
     // View Navigation (Modal Mode)
@@ -135,13 +150,18 @@ function render() {
     const loader = document.getElementById('loading-area');
     if (loader) {
         loader.remove();
-        document.querySelector('.container').style.justifyContent = 'flex-start';
+        
+        const container = document.querySelector('.container');
+        container.style.justifyContent = ''; // Clear inline style
+        
         document.getElementById('main-header').style.display = 'block';
         document.getElementById('main-view').style.display = 'block';
 
         const urlParams = new URLSearchParams(window.location.search);
         
-        if (urlParams.get('screen') !== 'true') {
+        if (urlParams.get('screen') === 'true') {
+            container.classList.add('is-screen-mode');
+        } else {
             const banner = document.getElementById('main-banner-whatsapp');
             if (banner) banner.style.display = 'flex';
             

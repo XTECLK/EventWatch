@@ -107,6 +107,20 @@
         </div>
     </footer>
 
+    <!-- Fullscreen Prompt Overlay -->
+    <div id="fullscreen-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; padding: 2rem;">
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; padding: 4rem 2rem; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+            <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); margin-bottom: 0.5rem;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </div>
+            <div style="color: white;">
+                <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">පූර්ණ තිරය</h2>
+                <p style="font-size: 0.95rem; opacity: 0.7; line-height: 1.5; font-weight: 500;">පූර්ණ තිර අත්දැකීම ලබා ගැනීමට පහත බොත්තම ඔබන්න.</p>
+            </div>
+            <button id="enable-fullscreen-btn" class="btn btn-primary" style="width: 100%; padding: 1.2rem; font-size: 1.1rem; border-radius: 16px; margin-top: 1rem; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);">ආරම්භ කරන්න</button>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
