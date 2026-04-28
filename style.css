@@ -437,6 +437,27 @@ body {
     color: var(--primary);
 }
 
+.action-body {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+/* Admin Features */
+.admin-clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.admin-clickable:hover {
+    background: rgba(0, 0, 0, 0.02);
+    transform: translateX(4px);
+    border-radius: 8px;
+}
+
 /* Status Badges */
 .live-badge {
     display: inline-flex;
