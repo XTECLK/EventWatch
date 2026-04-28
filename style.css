@@ -37,11 +37,11 @@ body {
 .container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 10rem 1.25rem 8rem; /* Header/Footer clearances */
+    padding: 7.25rem 1.25rem 6.25rem; /* Header/Footer clearances */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
     position: relative;
     z-index: 1;
     background: var(--bg-glass); /* Always show the content area */
@@ -116,6 +116,7 @@ body {
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 1.25rem;
 }
 
 .status-label {
@@ -160,7 +161,7 @@ body {
 }
 
 .section-box {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     text-align: center;
     max-width: 600px;
     margin-left: auto;
@@ -175,7 +176,7 @@ body {
     border-radius: 99px;
     font-size: 1rem;
     font-weight: 800;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 /* Centered Lists */
@@ -485,7 +486,6 @@ body {
 }
 
 @media (max-width: 480px) {
-    .container { padding-top: 8rem; }
     .header h1 { font-size: 1.5rem; }
 }
 
