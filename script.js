@@ -5,8 +5,8 @@
 
 // --- CONFIGURATION ---
 const CONFIG = {
-    flagsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTVeacJHWwlkad-jQIoR_u_ca1QpkeVoFjXueBikWGo_LPTRd0q4UzWWqqLfw2zqj8DiJ_Paq9EU9Dj/pub?gid=0&single=true&output=csv',
-    eventsUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSEPoK2b6oFQad7-TbtmOjbN2X2SO_HD7qIXO-7hVBxQkzC7pKM_cpLdyLoDd5LS9knYl-YtqShSydw/pub?gid=0&single=true&output=csv',
+    flagsUrl: 'https://docs.google.com/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
+    eventsUrl: 'https://docs.google.com/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
     refresh: 15000
 };
 
