@@ -35,7 +35,7 @@ body {
 
 /* Base Container */
 .container {
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 10rem 1.25rem 8rem; /* Header/Footer clearances */
     min-height: 100vh;
@@ -113,6 +113,9 @@ body {
     border-radius: 24px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .status-label {
@@ -159,6 +162,9 @@ body {
 .section-box {
     margin-bottom: 1.5rem;
     text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .badge-title {
@@ -460,4 +466,13 @@ body {
 @media (max-width: 480px) {
     .container { padding-top: 8rem; }
     .header h1 { font-size: 1.5rem; }
+}
+
+@media (min-width: 600px) {
+    .footer-content {
+        flex-direction: row;
+    }
+    .footer-row {
+        display: contents;
+    }
 }

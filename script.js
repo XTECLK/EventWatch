@@ -72,7 +72,11 @@ function render() {
         document.querySelector('.container').style.justifyContent = 'flex-start';
         document.getElementById('main-header').style.display = 'block';
         document.getElementById('main-view').style.display = 'block';
-        document.getElementById('main-footer').style.display = 'block';
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('screen') !== 'true' && urlParams.get('hidefooter') !== 'true') {
+            document.getElementById('main-footer').style.display = 'block';
+        }
     }
 
     if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
