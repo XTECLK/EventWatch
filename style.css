@@ -501,4 +501,7 @@ body {
     .footer-row {
         display: contents;
     }
+    .container.is-screen-mode {
+        justify-content: center;
+    }
 }
