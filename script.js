@@ -137,13 +137,16 @@ function render() {
         document.getElementById('main-header').style.display = 'block';
         document.getElementById('main-view').style.display = 'block';
 
-        const banner = document.getElementById('main-banner-whatsapp');
-        if (banner) banner.style.display = 'flex';
-
-        const ghost = document.getElementById('banner-ghost');
-        if (ghost) ghost.style.display = 'block';
-
         const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.get('screen') !== 'true') {
+            const banner = document.getElementById('main-banner-whatsapp');
+            if (banner) banner.style.display = 'flex';
+            
+            const ghost = document.getElementById('banner-ghost');
+            if (ghost) ghost.style.display = 'block';
+        }
+
         if (urlParams.get('screen') !== 'true' && urlParams.get('hidefooter') !== 'true') {
             document.getElementById('main-footer').style.display = 'block';
         }
