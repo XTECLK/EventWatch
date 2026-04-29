@@ -495,12 +495,6 @@ body {
 }
 
 @media (min-width: 600px) {
-    .footer-content {
-        flex-direction: row;
-    }
-    .footer-row {
-        display: contents;
-    }
     .container.is-screen-mode {
         justify-content: center;
     }

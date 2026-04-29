@@ -169,8 +169,12 @@ function render() {
             if (ghost) ghost.style.display = 'block';
         }
 
-        if (urlParams.get('screen') !== 'true' && urlParams.get('hidefooter') !== 'true') {
+        if (urlParams.get('hidefooter') !== 'true') {
             document.getElementById('main-footer').style.display = 'block';
+            if (urlParams.get('screen') === 'true') {
+                const footerRow = document.querySelector('.footer-row');
+                if (footerRow) footerRow.style.display = 'none';
+            }
         }
     }
 
