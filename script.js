@@ -147,6 +147,11 @@ function render() {
         if (photosLink) photosLink.href = f.FacebookLink;
     }
 
+    if (f.Organizer) {
+        const organizerEl = document.getElementById('organizer-name');
+        if (organizerEl) organizerEl.textContent = f.Organizer;
+    }
+
     const rawStatus = f.EventStatus || f['Event status'] || '';
     const status = rawStatus.toUpperCase().trim();
 
