@@ -22,8 +22,6 @@ let state = {
 };
 let statusInterval = null;
 
-const IS_ADMIN = new URLSearchParams(window.location.search).get('admin') === 'true';
-let activeBroadcastEvent = null;
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,11 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewAgendaBtn = document.getElementById('view-agenda');
     const closeModalBtn = document.querySelector('.close-modal');
 
-    // Action Menu Modal
-    const actionModal = document.getElementById('action-modal');
-    const closeActionBtn = document.getElementById('close-action-modal');
-    const notifyBtn = document.getElementById('notify-whatsapp-btn');
-    const updateBtn = document.getElementById('update-status-btn');
 
     if (viewAgendaBtn) viewAgendaBtn.onclick = () => {
         renderAgenda();
@@ -64,59 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         agendaModal.style.display = 'none';
     };
 
-    if (closeActionBtn) closeActionBtn.onclick = () => {
-        actionModal.style.display = 'none';
-    };
-
-    notifyBtn?.addEventListener('click', () => {
-        if (!activeBroadcastEvent) return;
-        const e = activeBroadcastEvent;
-        const name = e.Event || e.event || 'නොදනී';
-        const loc = (e.Location || e.location || '').trim() || 'ස්ථානය පසුවට දැනුම් දේ';
-        const s = (e.Status || e.status || '').toLowerCase().trim();
-
-        let resText = '';
-        if (s === 'finished') {
-            let places = parseInt(e.Places || e.places || '3', 10);
-            if (isNaN(places)) places = 3;
-
-            resText = `🏆 *තරග ප්‍රතිඵල:*\n\n🏃 *තරගය:* ${name}\n`;
-            let first = (e['1st'] || '').trim();
-            let second = (e['2nd'] || '').trim();
-            let third = (e['3rd'] || '').trim();
-
-            if (places === 0) {
-                resText += `\nමෙම තරගය සඳහා ජයග්‍රාහකයින් තෝරා නොගැනේ.`;
-            } else if (places === 1) {
-                first = first || 'තේරී නැත';
-                resText += `\n🥇 *ජයග්‍රාහකයා:* ${first}`;
-            } else {
-                first = first || 'තේරී නැත';
-                second = second || 'තේරී නැත';
-                third = third || 'තේරී නැත';
-                resText += `\n🥇 *ප්‍රථම ස්ථානය:* ${first}`;
-                if (places >= 2) resText += `\n🥈 *දෙවන ස්ථානය:* ${second}`;
-                if (places >= 3) resText += `\n🥉 *තෙවන ස්ථානය:* ${third}`;
-            }
-        } else if (s === 'cancelled') {
-            resText = `🚫 *තරගය අවලංගු කර ඇත:*\n\n🏃 *තරගය:* ${name}\n\nමෙම තරගය අවලංගු කර ඇති බව කරුණාවෙන් සලකන්න.`;
-        } else {
-            resText = `📢 *දැනුම්දීමයි:*\n\n🏃 *තරගය:* ${name}\n📍 *ස්ථානය:* ${loc}\n\nකරුණාකර අදාල තරගකරුවන් වහාම වාර්තා කරන්න.`;
-        }
-
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(resText)}`, '_blank');
-        actionModal.style.display = 'none';
-    });
-
-    updateBtn?.addEventListener('click', () => {
-        const editUrl = CONFIG.eventsUrl.replace('/export?format=csv&gid=0', '/edit');
-        window.open(editUrl, '_blank');
-        actionModal.style.display = 'none';
-    });
 
     window.onclick = (e) => {
         if (e.target == agendaModal) agendaModal.style.display = 'none';
-        if (e.target == actionModal) actionModal.style.display = 'none';
     };
 });
 
@@ -283,7 +226,7 @@ function renderAgenda() {
         }
 
         return `
-            <div class="event-item ${IS_ADMIN ? 'admin-clickable' : ''}" data-idx="${idx}">
+            <div class="event-item" data-idx="${idx}">
                 <div class="event-info">
                     <h3>${e.Event || e.event}</h3>
                     <div class="location-text-row">${locationText}</div>
@@ -295,14 +238,6 @@ function renderAgenda() {
             </div>`;
     }).join('')}</div>`;
 
-    if (IS_ADMIN) {
-        document.querySelectorAll('.admin-clickable').forEach(el => {
-            el.onclick = () => {
-                activeBroadcastEvent = state.events[el.getAttribute('data-idx')];
-                document.getElementById('action-modal').style.display = 'flex';
-            };
-        });
-    }
 
     document.querySelectorAll('.btn-results').forEach(btn => {
         btn.onclick = (event) => {
