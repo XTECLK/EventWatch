@@ -93,21 +93,21 @@ function render() {
     const loader = document.getElementById('loading-area');
     if (loader) {
         loader.remove();
-        
+
         const container = document.querySelector('.container');
         container.style.justifyContent = ''; // Clear inline style
-        
+
         document.getElementById('main-header').style.display = 'block';
         document.getElementById('main-view').style.display = 'block';
 
         const urlParams = new URLSearchParams(window.location.search);
-        
+
         if (urlParams.get('screen') === 'true') {
             container.classList.add('is-screen-mode');
         } else {
             const banner = document.getElementById('main-banner-whatsapp');
             if (banner) banner.style.display = 'flex';
-            
+
             const ghost = document.getElementById('banner-ghost');
             if (ghost) ghost.style.display = 'block';
         }
@@ -123,6 +123,29 @@ function render() {
 
     if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
     if (f.EventSubtext) document.getElementById('event-subtext').textContent = f.EventSubtext;
+
+    // Dynamic Social Links
+    const wLink = f.WhatsappLink || f.WhatappLink;
+    if (wLink) {
+        const mainBanner = document.getElementById('main-banner-whatsapp');
+        const agendaLink = document.getElementById('agenda-whatsapp-link');
+        if (mainBanner) mainBanner.href = wLink;
+        if (agendaLink) agendaLink.href = wLink;
+
+        const bannerTextElement = document.getElementById('whatsapp-banner-text');
+        if (bannerTextElement) {
+            if (wLink.toLowerCase().includes('/channel/')) {
+                bannerTextElement.textContent = 'WhatsApp චැනලයට එක්වන්න';
+            } else {
+                bannerTextElement.textContent = 'WhatsApp සමූහයට එක්වන්න';
+            }
+        }
+    }
+
+    if (f.FacebookLink) {
+        const photosLink = document.getElementById('photos-link');
+        if (photosLink) photosLink.href = f.FacebookLink;
+    }
 
     const rawStatus = f.EventStatus || f['Event status'] || '';
     const status = rawStatus.toUpperCase().trim();
