@@ -6,12 +6,12 @@
 // --- CONFIGURATION ---
 const CONFIG = {
     // DEV URLs
-    flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
-    eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
+    // flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
+    // eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
 
     // PROD URLs
-    // flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
-    // eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
+    flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
+    eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
 
     refresh: 15000
 };
@@ -227,14 +227,14 @@ function renderLists() {
 
     state.events.forEach(e => {
         const s = (e.Status || e.status || '').toLowerCase().trim();
-        
+
         if (s === 'on going' || s === 'up next') {
             const item = document.createElement('div');
             item.className = 'event-item';
             const loc = (e.Location || e.location || '').trim();
             const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
             item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${locationText}</p></div>`;
-            
+
             if (s === 'on going') oList.appendChild(item);
             else if (s === 'up next') uList.appendChild(item);
         } else if (s === 'finished') {
@@ -246,7 +246,7 @@ function renderLists() {
         }
     });
     const finishedWithIndex = finishedEvents.map((e, idx) => ({ e, idx }));
-    
+
     finishedWithIndex.sort((a, b) => {
         const parseTime = (t) => {
             if (!t) return 0;
@@ -255,7 +255,7 @@ function renderLists() {
         };
         const timeA = parseTime(a.e.EndedTime || a.e['Ended Time'] || a.e['Ended time'] || '');
         const timeB = parseTime(b.e.EndedTime || b.e['Ended Time'] || b.e['Ended time'] || '');
-        
+
         if (timeB !== timeA) {
             return timeB - timeA;
         }
@@ -319,7 +319,7 @@ function renderLists() {
                 <p>අප හා රැඳී සිටින්න</p>
             </div>
         </div>`;
-    
+
     if (!oList.children.length) oList.innerHTML = emptyStateHtml;
     if (!uList.children.length) uList.innerHTML = emptyStateHtml;
     if (!fList.children.length) fList.innerHTML = emptyStateHtml;
