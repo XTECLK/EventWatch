@@ -275,27 +275,27 @@ function renderLists() {
             resHtml = `<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 1rem 0;">ජයග්‍රාහකයින් තෝරා නොගැනේ</div>`;
         } else if (places === 1) {
             first = first || 'තේරී නැත';
-            resHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 0;">
-                <span style="font-size: 1.25rem;">🥇</span> <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${first}</span>
+            resHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.25rem 0;">
+                <span style="font-size: 1.25rem;">🥇</span> <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${first}</span>
             </div>`;
         } else {
             first = first || 'තේරී නැත';
             second = second || 'තේරී නැත';
             third = third || 'තේරී නැත';
-            resHtml = `<div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem 0;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+            resHtml = `<div style="display: flex; flex-direction: column; padding: 0.25rem 0;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
                     <span style="font-size: 1.25rem;">🥇</span>
-                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${first}</span>
+                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${first}</span>
                 </div>`;
             if (places >= 2) resHtml += `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
                     <span style="font-size: 1.25rem;">🥈</span>
-                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${second}</span>
+                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${second}</span>
                 </div>`;
             if (places >= 3) resHtml += `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
                     <span style="font-size: 1.25rem;">🥉</span>
-                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${third}</span>
+                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${third}</span>
                 </div>`;
             resHtml += `</div>`;
         }
