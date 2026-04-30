@@ -275,27 +275,29 @@ function renderLists() {
             resHtml = `<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 1rem 0;">ජයග්‍රාහකයින් තෝරා නොගැනේ</div>`;
         } else if (places === 1) {
             first = first || 'තේරී නැත';
-            resHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem; padding: 0.25rem 0;">
-                <span style="font-size: 1.25rem;">🥇</span> <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${first}</span>
+            resHtml = `<div class="results-container">
+                <div class="result-item">
+                    <span style="font-size: 1.25rem;">🥇</span> <span class="result-text">${first}</span>
+                </div>
             </div>`;
         } else {
             first = first || 'තේරී නැත';
             second = second || 'තේරී නැත';
             third = third || 'තේරී නැත';
-            resHtml = `<div style="display: flex; flex-direction: column; padding: 0.25rem 0;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+            resHtml = `<div class="results-container">
+                <div class="result-item">
                     <span style="font-size: 1.25rem;">🥇</span>
-                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${first}</span>
+                    <span class="result-text">${first}</span>
                 </div>`;
             if (places >= 2) resHtml += `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                <div class="result-item">
                     <span style="font-size: 1.25rem;">🥈</span>
-                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${second}</span>
+                    <span class="result-text">${second}</span>
                 </div>`;
             if (places >= 3) resHtml += `
-                <div style="display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                <div class="result-item">
                     <span style="font-size: 1.25rem;">🥉</span>
-                    <span style="font-weight: 600; color: var(--text-muted); font-size: 0.85rem;">${third}</span>
+                    <span class="result-text">${third}</span>
                 </div>`;
             resHtml += `</div>`;
         }
