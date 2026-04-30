@@ -119,6 +119,10 @@ body {
     margin-bottom: 1.25rem;
 }
 
+#status-section {
+    margin-top: 1.25rem;
+}
+
 .status-label {
     font-size: 0.9rem;
     font-weight: 700;
