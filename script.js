@@ -3,19 +3,6 @@
  * Highly optimized for stability with CSV data and cache-busting.
  */
 
-// --- CONFIGURATION ---
-const CONFIG = {
-    // DEV URLs
-    // flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
-    // eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
-
-    // PROD URLs
-    flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
-    eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
-
-    refresh: 15000
-};
-
 let state = {
     flags: { 'EventName': 'පූරණය වෙමින්...', 'EventStatus': 'PENDING' },
     events: []
