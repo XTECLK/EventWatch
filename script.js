@@ -6,12 +6,12 @@
 // --- CONFIGURATION ---
 const CONFIG = {
     // DEV URLs
-    // flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
-    // eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
+    flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
+    eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
 
     // PROD URLs
-    flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
-    eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
+    // flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
+    // eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
 
     refresh: 15000
 };
@@ -207,10 +207,11 @@ function updateCountdown(target) {
 function renderLists() {
     const oList = document.getElementById('ongoing-events-list');
     const uList = document.getElementById('upcoming-events-list');
+    const fList = document.getElementById('finished-events-list');
     const mainView = document.getElementById('events-main-view');
-    if (!oList || !uList || !mainView) return;
+    if (!oList || !uList || !fList || !mainView) return;
 
-    oList.innerHTML = ''; uList.innerHTML = '';
+    oList.innerHTML = ''; uList.innerHTML = ''; fList.innerHTML = '';
 
     const rawStatus = state.flags.EventStatus || state.flags['Event status'] || '';
     const status = rawStatus.toUpperCase().trim();
@@ -220,22 +221,106 @@ function renderLists() {
         return;
     }
 
-    mainView.style.display = 'block';
+    mainView.style.display = '';
+
+    const finishedEvents = [];
 
     state.events.forEach(e => {
-        const item = document.createElement('div');
-        item.className = 'event-item';
-        const loc = (e.Location || e.location || '').trim();
-        const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
-        item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${locationText}</p></div>`;
-
         const s = (e.Status || e.status || '').toLowerCase().trim();
-        if (s === 'on going') oList.appendChild(item);
-        else if (s === 'up next') uList.appendChild(item);
+        
+        if (s === 'on going' || s === 'up next') {
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            const loc = (e.Location || e.location || '').trim();
+            const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
+            item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${locationText}</p></div>`;
+            
+            if (s === 'on going') oList.appendChild(item);
+            else if (s === 'up next') uList.appendChild(item);
+        } else if (s === 'finished') {
+            let places = parseInt(e.Places || e.places || '3', 10);
+            if (isNaN(places)) places = 3;
+            if (places > 0) {
+                finishedEvents.push(e);
+            }
+        }
+    });
+    const finishedWithIndex = finishedEvents.map((e, idx) => ({ e, idx }));
+    
+    finishedWithIndex.sort((a, b) => {
+        const parseTime = (t) => {
+            if (!t) return 0;
+            const parsed = new Date(t).getTime();
+            return isNaN(parsed) ? 0 : parsed;
+        };
+        const timeA = parseTime(a.e.EndedTime || a.e['Ended Time'] || a.e['Ended time'] || '');
+        const timeB = parseTime(b.e.EndedTime || b.e['Ended Time'] || b.e['Ended time'] || '');
+        
+        if (timeB !== timeA) {
+            return timeB - timeA;
+        }
+        return b.idx - a.idx;
     });
 
-    if (!oList.children.length) oList.innerHTML = '<div class="empty-state">දැනට පැවැත්වෙන සිදුවීම් කිසිවක් නැත</div>';
-    if (!uList.children.length) uList.innerHTML = '<div class="empty-state">මීලගට සැලසුම් කළ සිදුවීම් කිසිවක් නැත</div>';
+    const lastThreeFinished = finishedWithIndex.slice(0, 3).map(obj => obj.e);
+    lastThreeFinished.forEach(e => {
+        let places = parseInt(e.Places || e.places || '3', 10);
+        if (isNaN(places)) places = 3;
+        let first = (e['1st'] || '').trim();
+        let second = (e['2nd'] || '').trim();
+        let third = (e['3rd'] || '').trim();
+
+        let resHtml = '';
+        if (places === 0) {
+            resHtml = `<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 1rem 0;">ජයග්‍රාහකයින් තෝරා නොගැනේ</div>`;
+        } else if (places === 1) {
+            first = first || 'තේරී නැත';
+            resHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 0;">
+                <span style="font-size: 1.25rem;">🥇</span> <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${first}</span>
+            </div>`;
+        } else {
+            first = first || 'තේරී නැත';
+            second = second || 'තේරී නැත';
+            third = third || 'තේරී නැත';
+            resHtml = `<div style="display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem 0;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                    <span style="font-size: 1.25rem;">🥇</span>
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${first}</span>
+                </div>`;
+            if (places >= 2) resHtml += `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                    <span style="font-size: 1.25rem;">🥈</span>
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${second}</span>
+                </div>`;
+            if (places >= 3) resHtml += `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem;">
+                    <span style="font-size: 1.25rem;">🥉</span>
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">${third}</span>
+                </div>`;
+            resHtml += `</div>`;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'event-item';
+        item.innerHTML = `
+            <div class="event-info">
+                <h3>${e.Event || e.event}</h3>
+                ${resHtml}
+            </div>`;
+        fList.appendChild(item);
+    });
+
+    const emptyStateHtml = `
+        <div class="event-item empty-state-card" style="border-bottom: none; opacity: 0.7;">
+            <div class="event-info">
+                <h3>සිදුවීම් නොමැත</h3>
+                <p>අප හා රැඳී සිටින්න</p>
+            </div>
+        </div>`;
+    
+    if (!oList.children.length) oList.innerHTML = emptyStateHtml;
+    if (!uList.children.length) uList.innerHTML = emptyStateHtml;
+    if (!fList.children.length) fList.innerHTML = emptyStateHtml;
 }
 
 function renderAgenda() {

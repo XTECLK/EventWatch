@@ -115,3 +115,25 @@ function sendWhatsAppMessage() {
     
   SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Send WhatsApp Notification');
 }
+
+function onEdit(e) {
+  if (!e) return;
+  const range = e.range;
+  const sheet = range.getSheet();
+  
+  // Status column is C (3)
+  if (range.getColumn() === 3 && range.getRow() > 1) {
+    const value = String(e.value || range.getValue()).toLowerCase().trim();
+    
+    // Column H is 8
+    const timeCell = sheet.getRange(range.getRow(), 8);
+    
+    if (value === 'finished') {
+      // Set current date/time when status changes to finished
+      // Format it as a readable string or a date object
+      const now = new Date();
+      timeCell.setValue(now);
+    }
+  }
+}
+
