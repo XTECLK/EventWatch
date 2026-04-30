@@ -551,6 +551,10 @@ body {
         margin-right: auto;
     }
 
+    #status-section {
+        max-width: 600px;
+    }
+
     .empty-state-card {
         display: none !important;
     }
