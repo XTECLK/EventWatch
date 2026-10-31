@@ -235,6 +235,8 @@ function initDashboard_(title, force) {
     ['WhatsappLink', ''],
     ['FacebookLink', '']
   ]);
+  flags.getRange('B4').setDataValidation(dropdown_(['en', 'si']));                       // Language
+  flags.getRange('B5').setDataValidation(dropdown_(['PENDING', 'ON_GOING', 'FINISHED'])); // EventStatus
   flags.autoResizeColumns(1, 2);
 
   const events = ss.insertSheet('Events');
@@ -247,8 +249,7 @@ function initDashboard_(title, force) {
     ['High Jump', 'Sand Pit', 'Cancelled', 3]
   ]);
   events.getRange(2, 3, 200, 1).setDataValidation(
-    SpreadsheetApp.newDataValidation()
-      .requireValueInList(['Pending', 'Up Next', 'On Going', 'Finished', 'Cancelled'], true).build());
+    dropdown_(['Pending', 'Up Next', 'On Going', 'Finished', 'Cancelled']));
   events.setFrozenRows(1);
   events.autoResizeColumns(1, headers.length);
 
@@ -258,4 +259,8 @@ function initDashboard_(title, force) {
 
   props.setProperty('SHEET_ID', ss.getId());
   return { sheetId: ss.getId(), sheetUrl: ss.getUrl(), created: true };
+}
+
+function dropdown_(values) {
+  return SpreadsheetApp.newDataValidation().requireValueInList(values, true).setAllowInvalid(false).build();
 }
