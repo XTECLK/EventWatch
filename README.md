@@ -27,7 +27,7 @@ npm run setup
 4. Save everything it learned, and the frontend config, to `.eventwatch/app.json` (script ID, deployment ID, web app URL, sheet ID/URL, tab names, refresh). It is gitignored, so each fork gets its own; the site reads the generated `public/config.json`.
 5. Deploy the frontend to Vercel or Netlify (or skip and use `npm start`).
 
-Afterwards: `npm run google:update` pushes script changes to the same deployment, and `npm run deploy` redeploys the frontend.
+Afterwards: `npm run google:update` pushes script changes to the same deployment, and `npm run deploy` redeploys the frontend. `npm run google:new-sheet` makes a fresh sheet with the current sample data and points the site at it (the old sheet stays in your Drive). Updating the script never changes a sheet that already exists.
 
 The website never writes to the sheet. It only fetches the sheet as CSV and displays it; you edit the sheet directly. The Apps Script web app is used only at setup time.
 

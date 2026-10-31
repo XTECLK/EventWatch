@@ -172,14 +172,15 @@ function onSheetEdit(e) {
  * just returns the (public, view-only) sheet's id; nothing else is writable.
  *
  *   ping   -> { ok: true }
- *   init   -> creates the dashboard spreadsheet (once) and returns its id
+ *   init   -> creates the dashboard spreadsheet (once) and returns its id;
+ *             with force:true always makes a new one (the old stays in Drive)
  */
 function doPost(e) {
   let body = {};
   try { body = JSON.parse(e.postData.contents); } catch (err) { /* handled below */ }
   try {
     if (body.action === 'ping') return json_({ ok: true });
-    if (body.action === 'init') return json_(Object.assign({ ok: true }, initDashboard_(body.title)));
+    if (body.action === 'init') return json_(Object.assign({ ok: true }, initDashboard_(body.title, body.force === true)));
     return json_({ ok: false, error: 'Unknown action' });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
@@ -209,10 +210,10 @@ function authorize() {
  * finish-time triggers. Idempotent: reuses the sheet remembered in the
  * script properties.
  */
-function initDashboard_(title) {
+function initDashboard_(title, force) {
   const props = PropertiesService.getScriptProperties();
   const existing = props.getProperty('SHEET_ID');
-  if (existing) {
+  if (existing && !force) {
     try {
       const ss = SpreadsheetApp.openById(existing);
       return { sheetId: existing, sheetUrl: ss.getUrl(), created: false };

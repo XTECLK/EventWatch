@@ -85,9 +85,21 @@ export async function update() {
   console.log(`Updated the script at ${state.url}`);
 }
 
+// Makes a brand-new sheet with the current sample data (the old one stays in Drive).
+export async function newSheet() {
+  const state = await readState();
+  if (!state) throw new Error("Nothing set up yet: run npm run setup first.");
+  await update();
+  const result = await call(state.url, "init", { title: state.title, force: true });
+  if (!result?.ok) throw new Error(result?.error || "The web app didn't answer; wait a few seconds and try again.");
+  Object.assign(state, { sheetId: result.sheetId, sheetUrl: result.sheetUrl });
+  await writeState(state);
+  console.log(`New Google Sheet: ${state.sheetUrl}\nRun npm run deploy to publish the site with it.`);
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const [action, ...args] = process.argv.slice(2);
-  const actions = { create, update };
-  if (!actions[action]) { console.error("Use: node scripts/google-app.mjs create [--title T] | update"); process.exit(1); }
+  const actions = { create, update, "new-sheet": newSheet };
+  if (!actions[action]) { console.error("Use: node scripts/google-app.mjs create [--title T] | update | new-sheet"); process.exit(1); }
   actions[action](args).catch((e) => { console.error(e.message); process.exit(1); });
 }
