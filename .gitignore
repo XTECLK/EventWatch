@@ -5,3 +5,8 @@ node_modules/
 .idea/
 dist/
 .env
+
+# clasp's project file.
+google/.clasp.json
+.vercel/
+.netlify/

@@ -1,13 +1,18 @@
 {
   "name": "eventwatch",
   "version": "1.0.0",
-  "description": "Static website for EventWatch",
-  "main": "index.html",
+  "description": "Live event status dashboard backed by a Google Sheet",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "start": "npx serve .",
-    "dev": "npx serve ."
+    "start": "npx --yes serve .",
+    "setup": "node scripts/setup.mjs",
+    "google:create": "node scripts/google-app.mjs create",
+    "google:update": "node scripts/google-app.mjs update",
+    "deploy": "node scripts/deploy.mjs"
   },
-  "keywords": [],
-  "author": "",
+  "devDependencies": {
+    "@google/clasp": "^3.4.1"
+  },
   "license": "ISC"
 }

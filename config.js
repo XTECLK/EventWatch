@@ -1,25 +1,24 @@
-const DOMAIN_CONFIG = {
-    // Development configs mapped by domain
-    'localhost': {
-        flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
-        eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
-    },
-    '127.0.0.1': {
-        flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1Kn9fKSrXvKeoheT2QITatpOBKel3KCKzTOTtVQAOuxs/export?format=csv&gid=0',
-        eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1xYny4WkVy9R5zp8pvih_2iDC43i_k1-MmbCs5DBm-tE/export?format=csv&gid=0',
-    },
-    // Default config for production and any other unmapped domains
-    'default': {
-        flagsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1CFk4ZNrmoAQPJ63biuAPgsNj7IOtv7121AI-Nfc8HyQ/export?format=csv&gid=0',
-        eventsUrl: 'https://d1rjwubi68tcys.cloudfront.net/spreadsheets/d/1-FFCVjlh286EsGJxf8bevz6usy9SzznEbZemXQj2Wmg/export?format=csv&gid=0',
-    }
-};
+/**
+ * EventWatch frontend config. The settings live in `.eventwatch/app.json`
+ * (written by `npm run setup`); this file just loads them.
+ *
+ *   sheetId    Google Sheet to read (must be shared "Anyone with the link: Viewer")
+ *   flagsTab   tab name for key/value settings   (default "Flags")
+ *   eventsTab  tab name for the events table     (default "Events")
+ *   refresh    milliseconds between refreshes    (default 15000)
+ */
+const CONFIG = { refresh: 15000, flagsUrl: '', eventsUrl: '' };
 
-const currentDomain = window.location.hostname;
-const activeDomainConfig = DOMAIN_CONFIG[currentDomain] || DOMAIN_CONFIG['default'];
-
-const CONFIG = {
-    flagsUrl: activeDomainConfig.flagsUrl,
-    eventsUrl: activeDomainConfig.eventsUrl,
-    refresh: 15000
-};
+CONFIG.ready = fetch('.eventwatch/app.json', { cache: 'no-store' })
+    .then(r => {
+        if (!r.ok) throw new Error('Cannot load .eventwatch/app.json - run `npm run setup` first.');
+        return r.json();
+    })
+    .then(app => {
+        const csv = (id, tab) =>
+            `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+        const id = app.sheetId;
+        CONFIG.flagsUrl = csv(id, app.flagsTab || 'Flags');
+        CONFIG.eventsUrl = csv(id, app.eventsTab || 'Events');
+        CONFIG.refresh = app.refresh || CONFIG.refresh;
+    });

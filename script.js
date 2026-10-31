@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- DATA FETCHING ---
 async function fetchData() {
     try {
+        await CONFIG.ready;
         const bust = (url) => url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
         const [fR, eR] = await Promise.all([
             fetch(bust(CONFIG.flagsUrl)),
@@ -67,8 +68,8 @@ async function fetchData() {
     } catch (e) { console.error('Sync Error:', e); }
 }
 
-function startDataLoop() {
-    fetchData();
+async function startDataLoop() {
+    await fetchData();
     setInterval(fetchData, CONFIG.refresh);
 }
 
@@ -378,14 +379,30 @@ function generateResultsHtml(e) {
 // --- UTILS ---
 function parseCsv(text) {
     if (!text) return [];
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) return [];
+    // RFC 4180 parser: handles quoted fields, commas and newlines inside quotes
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+            if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+            else if (c === '"') inQuotes = false;
+            else field += c;
+        } else if (c === '"') inQuotes = true;
+        else if (c === ',') { row.push(field); field = ''; }
+        else if (c === '\n' || c === '\r') {
+            if (c === '\r' && text[i + 1] === '\n') i++;
+            row.push(field); field = '';
+            rows.push(row); row = [];
+        } else field += c;
+    }
+    row.push(field); rows.push(row);
 
-    const headers = lines[0].split(',').map(h => h.trim());
-    return lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim());
-        return headers.reduce((obj, h, i) => { obj[h] = values[i]; return obj; }, {});
-    });
+    const lines = rows.filter(r => r.some(v => v.trim()));
+    if (lines.length < 2) return [];
+    const headers = lines[0].map(h => h.trim());
+    return lines.slice(1).map(values =>
+        headers.reduce((obj, h, i) => { obj[h] = (values[i] || '').trim(); return obj; }, {}));
 }
 
 function parseParams(data) {
