@@ -8,7 +8,8 @@ dist/
 
 # Your own IDs and frontend config, written by npm run setup (each fork makes its own).
 .eventwatch/
-config.json
+# The staged site (npm run deploy / npm start), plus host links saved in it.
+public/
 # clasp's project file.
 google/.clasp.json
 .vercel/

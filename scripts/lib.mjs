@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { access, readFile, writeFile, mkdir } from "node:fs/promises";
+import { access, cp, readFile, writeFile, mkdir } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
@@ -54,11 +54,17 @@ export function openUrl(url) {
   spawn(cmd, [url], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).on("error", () => {}).unref();
 }
 
-// The site reads config.json (a dot-folder like .eventwatch/ isn't uploaded by
-// every host's CLI). It's made from app.json, with only what the browser needs.
-export async function writeFrontendConfig() {
+// Stages the site into public/ (gitignored): the static files plus config.json,
+// made from .eventwatch/app.json with only what the browser needs. Files are
+// overwritten in place so host links saved in public/ (.vercel, .netlify) survive.
+export const SITE_FILES = ["index.html", "style.css", "script.js", "config.js", "assets"];
+export const PUBLIC_DIR = `${ROOT}public`;
+
+export async function buildPublic() {
   const state = await readState();
   if (!state?.sheetId) throw new Error("No sheet yet: run npm run setup first.");
+  await mkdir(PUBLIC_DIR, { recursive: true });
+  for (const f of SITE_FILES) await cp(`${ROOT}${f}`, `${PUBLIC_DIR}/${f}`, { recursive: true });
   const { sheetId, flagsTab, eventsTab, refresh } = state;
-  await writeFile(`${ROOT}config.json`, `${JSON.stringify({ sheetId, flagsTab, eventsTab, refresh }, null, 2)}\n`);
+  await writeFile(`${PUBLIC_DIR}/config.json`, `${JSON.stringify({ sheetId, flagsTab, eventsTab, refresh }, null, 2)}\n`);
 }

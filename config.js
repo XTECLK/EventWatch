@@ -1,6 +1,6 @@
 /**
  * EventWatch frontend config. The settings live in `config.json`
- * (made from .eventwatch/app.json by `npm run setup`/`npm run deploy`); this file just loads them.
+ * (made from .eventwatch/app.json by `npm run setup`/`npm run deploy`); this file just loads them from public/config.json once staged.
  *
  *   sheetId    Google Sheet to read (must be shared "Anyone with the link: Viewer")
  *   flagsTab   tab name for key/value settings   (default "Flags")

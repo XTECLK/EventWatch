@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Deploys the static frontend. Run `npm run deploy` any time to redeploy.
 import { fileURLToPath } from "node:url";
-import { ask, run, writeFrontendConfig } from "./lib.mjs";
+import { ask, run, buildPublic, PUBLIC_DIR } from "./lib.mjs";
 
 export async function deploy() {
-  await writeFrontendConfig();
+  await buildPublic();
   console.log("Deploy the frontend:\n  1) Vercel\n  2) Netlify\n  3) Skip (run locally with: npm start)");
   const choice = await ask("Choose [1-3]: ");
-  if (choice === "1") await run("npx", ["--yes", "vercel", "deploy", "--prod"]);
+  if (choice === "1") await run("npx", ["--yes", "vercel", "deploy", "--prod"], { cwd: PUBLIC_DIR });
   else if (choice === "2") {
-    const netlify = (...args) => run("npx", ["--yes", "netlify-cli", ...args]);
+    const netlify = (...args) => run("npx", ["--yes", "netlify-cli", ...args], { cwd: PUBLIC_DIR });
     // Log in first (opens a browser); deploying without a session fails.
     // `status` may exit 0 even when logged out, so check its output.
     const status = await run("npx", ["--yes", "netlify-cli", "status"], { quiet: true }).catch(() => "");
