@@ -53,3 +53,12 @@ export function openUrl(url) {
   const cmd = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
   spawn(cmd, [url], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).on("error", () => {}).unref();
 }
+
+// The site reads config.json (a dot-folder like .eventwatch/ isn't uploaded by
+// every host's CLI). It's made from app.json, with only what the browser needs.
+export async function writeFrontendConfig() {
+  const state = await readState();
+  if (!state?.sheetId) throw new Error("No sheet yet: run npm run setup first.");
+  const { sheetId, flagsTab, eventsTab, refresh } = state;
+  await writeFile(`${ROOT}config.json`, `${JSON.stringify({ sheetId, flagsTab, eventsTab, refresh }, null, 2)}\n`);
+}

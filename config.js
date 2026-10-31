@@ -1,6 +1,6 @@
 /**
- * EventWatch frontend config. The settings live in `.eventwatch/app.json`
- * (written by `npm run setup`); this file just loads them.
+ * EventWatch frontend config. The settings live in `config.json`
+ * (made from .eventwatch/app.json by `npm run setup`/`npm run deploy`); this file just loads them.
  *
  *   sheetId    Google Sheet to read (must be shared "Anyone with the link: Viewer")
  *   flagsTab   tab name for key/value settings   (default "Flags")
@@ -9,9 +9,9 @@
  */
 const CONFIG = { refresh: 15000, flagsUrl: '', eventsUrl: '' };
 
-CONFIG.ready = fetch('.eventwatch/app.json', { cache: 'no-store' })
+CONFIG.ready = fetch('config.json', { cache: 'no-store' })
     .then(r => {
-        if (!r.ok) throw new Error('Cannot load .eventwatch/app.json - run `npm run setup` first.');
+        if (!r.ok) throw new Error('Cannot load config.json - run `npm run setup`/`npm run deploy` first.');
         return r.json();
     })
     .then(app => {

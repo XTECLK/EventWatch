@@ -9,11 +9,11 @@
 // https://script.google.com/home/usersettings.
 //
 // Everything learned is saved to .eventwatch/app.json (scriptId, deploymentId,
-// web app url, sheetId, sheetUrl). That file is also the frontend's config
-// (config.js reads it), so commit and deploy it. It holds IDs only, no secrets.
+// web app url, sheetId, sheetUrl). The site reads config.json,
+// made from it by writeFrontendConfig() (also on every deploy).
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { GOOGLE_DIR, STATE_FILE, ask, clasp, exists, openUrl, readState, writeState } from "./lib.mjs";
+import { GOOGLE_DIR, STATE_FILE, ask, clasp, exists, openUrl, readState, writeFrontendConfig, writeState } from "./lib.mjs";
 
 const MANIFEST_FILE = `${GOOGLE_DIR}/appsscript.json`;
 
@@ -70,7 +70,8 @@ In the editor that opens, pick the function "authorize", click Run, and allow it
     console.log(result?.error ? `The script said: ${result.error}` : "Not authorized yet (or the deployment is still starting). Try again.");
   }
   await writeState(state);
-  console.log(`\nCreated the Google Sheet: ${state.sheetUrl}\nSaved the IDs and config to .eventwatch/app.json.`);
+  await writeFrontendConfig();
+  console.log(`\nCreated the Google Sheet: ${state.sheetUrl}\nSaved the IDs and config to .eventwatch/app.json (and config.json for the site).`);
   return state;
 }
 

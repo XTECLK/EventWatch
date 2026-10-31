@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Deploys the static frontend. Run `npm run deploy` any time to redeploy.
 import { fileURLToPath } from "node:url";
-import { ask, run } from "./lib.mjs";
+import { ask, run, writeFrontendConfig } from "./lib.mjs";
 
 export async function deploy() {
+  await writeFrontendConfig();
   console.log("Deploy the frontend:\n  1) Vercel\n  2) Netlify\n  3) Skip (run locally with: npm start)");
   const choice = await ask("Choose [1-3]: ");
   if (choice === "1") await run("npx", ["--yes", "vercel", "deploy", "--prod"]);
