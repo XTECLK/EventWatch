@@ -36,7 +36,7 @@ export function run(command, args, { cwd = ROOT, input, quiet = false } = {}) {
       if (code === 0) return resolve(output);
       const hint = /Apps Script API/i.test(output)
         ? "\nTurn on the Apps Script API at https://script.google.com/home/usersettings, then try again."
-        : /login|credential|unauthenticated/i.test(output) ? "\nLog in first: npx clasp login" : "";
+        : args.includes("clasp") && /login|credential|unauthenticated/i.test(output) ? "\nLog in first: npx clasp login" : "";
       reject(new Error(`${command} ${args.join(" ")} failed.${hint}`));
     });
   });

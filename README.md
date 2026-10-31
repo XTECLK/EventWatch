@@ -24,7 +24,7 @@ npm run setup
 1. Log you into Google through [`clasp`](https://github.com/google/clasp) (browser window).
 2. Create a standalone Apps Script project (`google/`), deploy it as a web app.
 3. Open the script editor so you can run `authorize` once (Google requires this click), then call the web app, which **creates the Google Sheet** (with `Flags` and `Events` tabs and sample data), shares it view-only by link and installs the sheet's menu/triggers.
-4. Save everything it learned, and the frontend config, to `.eventwatch/app.json` (script ID, deployment ID, web app URL, sheet ID/URL, tab names, refresh). Commit this file: it holds IDs only, and the site reads it at runtime.
+4. Save everything it learned, and the frontend config, to `.eventwatch/app.json` (script ID, deployment ID, web app URL, sheet ID/URL, tab names, refresh). It is gitignored, so each fork gets its own; the deploy uploads it from your machine, and the site reads it at runtime.
 5. Deploy the frontend to Vercel or Netlify (or skip and use `npm start`).
 
 Afterwards: `npm run google:update` pushes script changes to the same deployment, and `npm run deploy` redeploys the frontend.
@@ -63,7 +63,7 @@ Keep the header row exactly as above. The Apps Script relies on column positions
 
 ## Configuration (`.eventwatch/app.json`)
 
-`npm run setup` writes this file and `config.js` loads it in the browser, so it must be deployed with the site.
+`npm run setup` writes this file and `config.js` loads it in the browser, so it is uploaded with the site by `npm run deploy` (not via git).
 
 ```json
 {
@@ -103,7 +103,7 @@ index.html / style.css / script.js   frontend
 config.js                            loads .eventwatch/app.json
 google/                              Apps Script web app (creates the sheet; menu, WhatsApp share, auto timestamps)
 scripts/                             setup, google-app (clasp) and deploy tooling
-.eventwatch/app.json                 IDs + frontend config (created by setup, committed)
+.eventwatch/app.json                 IDs + frontend config (created by setup, gitignored)
 ```
 
 ## Troubleshooting
