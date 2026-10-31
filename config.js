@@ -16,7 +16,7 @@ CONFIG.ready = fetch('config.json', { cache: 'no-store' })
     })
     .then(app => {
         const csv = (id, tab) =>
-            `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+            `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}`;
         const id = app.sheetId;
         CONFIG.flagsUrl = csv(id, app.flagsTab || 'Flags');
         CONFIG.eventsUrl = csv(id, app.eventsTab || 'Events');

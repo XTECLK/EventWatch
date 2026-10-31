@@ -93,8 +93,6 @@ function render() {
         if (urlParams.get('screen') === 'true') {
             container.classList.add('is-screen-mode');
         } else {
-            const banner = document.getElementById('main-banner-whatsapp');
-            if (banner) banner.style.display = 'flex';
         }
 
         if (urlParams.get('hidefooter') !== 'true') {
@@ -106,11 +104,17 @@ function render() {
         }
     }
 
-    if (f.EventName) document.getElementById('event-name').textContent = f.EventName;
+    if (f.EventName) {
+        document.getElementById('event-name').textContent = f.EventName;
+        document.title = f.EventName;
+    }
     if (f.EventSubtext) document.getElementById('event-subtext').textContent = f.EventSubtext;
 
     // Dynamic Social Links
     const wLink = f.WhatsappLink || f.WhatappLink;
+    const waBanner = document.getElementById('main-banner-whatsapp');
+    const screenMode = new URLSearchParams(window.location.search).get('screen') === 'true';
+    if (waBanner) waBanner.style.display = (wLink && !screenMode) ? 'flex' : 'none';
     if (wLink) {
         const mainBanner = document.getElementById('main-banner-whatsapp');
         const agendaLink = document.getElementById('agenda-whatsapp-link');
@@ -127,15 +131,16 @@ function render() {
         }
     }
 
-    if (f.FacebookLink) {
-        const photosLink = document.getElementById('photos-link');
-        if (photosLink) photosLink.href = f.FacebookLink;
+    const photosLink = document.getElementById('photos-link');
+    if (photosLink) {
+        if (f.FacebookLink) photosLink.href = f.FacebookLink;
+        photosLink.style.display = f.FacebookLink ? '' : 'none';
     }
 
-    if (f.Organizer) {
-        const organizerEl = document.getElementById('organizer-name');
-        if (organizerEl) organizerEl.textContent = f.Organizer;
-    }
+    const organizerEl = document.getElementById('organizer-name');
+    if (organizerEl) organizerEl.textContent = f.Organizer || '';
+    const organizerRow = document.getElementById('organizer-row');
+    if (organizerRow) organizerRow.style.display = f.Organizer ? '' : 'none';
 
     const rawStatus = f.EventStatus || f['Event status'] || '';
     const status = rawStatus.toUpperCase().trim();
