@@ -41,6 +41,7 @@ The sheet is read as CSV, so it must be shared as **Anyone with the link → Vie
 |---|---|
 | `EventName` | Title in the header |
 | `EventSubtext` | Subtitle in the header |
+| `Language` | `en` (English) or `si` (Sinhala); defaults to `si` if missing. Switches all labels on the site and the WhatsApp messages from the sheet menu |
 | `EventStatus` | `PENDING` (countdown shown), `ON_GOING`, or `FINISHED` |
 | `EventStartDate` | `YYYY-MM-DD` - countdown target |
 | `EventStartTime` | `HH:MM:SS` - countdown target |
@@ -54,7 +55,7 @@ The sheet is read as CSV, so it must be shared as **Anyone with the link → Vie
 |---|---|
 | `Event` | Name |
 | `Location` | Venue |
-| `Status` | `pending`, `ongoing`, `finished` or `cancelled` |
+| `Status` | `Pending`, `Up Next`, `On Going`, `Finished` or `Cancelled` (case, spaces and dashes don't matter) |
 | `Places` | How many podium places (`0`-`3`, default 3) |
 | `1st`, `2nd`, `3rd` | Winners |
 | `EndedTime` | Auto-filled when Status becomes `finished`; used to sort results |
@@ -81,6 +82,7 @@ Keep the header row exactly as above. The Apps Script relies on column positions
 
 | Param | Effect |
 |---|---|
+| `?lang=en` / `?lang=si` | Overrides the sheet's `Language` |
 | `?fullscreen=true` | Shows a "start" overlay that enters browser fullscreen (kiosk screens) |
 | `?hidefooter=true` | Hides the footer |
 | `?screen=true` | Footer without buttons (big display) |
@@ -93,13 +95,14 @@ Keep the header row exactly as above. The Apps Script relies on column positions
 
 ## Customizing
 
-- UI text (Sinhala by default) lives in `index.html` and `script.js`; the WhatsApp messages are in `google/Code.js`. Replace them with your language.
+- **Languages:** English and Sinhala are built in. Set `Language` in the `Flags` tab, or add `?lang=en` / `?lang=si` to the URL to override. Site labels live in `i18n.js`; the WhatsApp messages in `google/Code.js` (`MESSAGES`). To add a language, copy one block in each and translate it.
 - Styling is in `style.css`; the background image is in `assets/`.
 
 ## Project layout
 
 ```
 index.html / style.css / script.js   frontend
+i18n.js                              English / Sinhala labels
 config.js                            loads config.json (generated into public/)
 public/                              staged site that gets deployed (generated, gitignored)
 google/                              Apps Script web app (creates the sheet; menu, WhatsApp share, auto timestamps)

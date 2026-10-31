@@ -14,7 +14,8 @@ export async function deploy() {
     // `status` may exit 0 even when logged out, so check its output.
     const status = await run("npx", ["--yes", "netlify-cli", "status"], { quiet: true }).catch(() => "");
     if (!/Current Netlify User|Email:/i.test(status)) await netlify("login");
-    await netlify("deploy", "--prod", "--dir", ".");
+    // --no-build: the site is already static; skip any build command set on the Netlify site (e.g. hugo).
+    await netlify("deploy", "--prod", "--no-build", "--dir", ".");
   }
   else console.log("Skipped. Run it locally with: npm start");
 }

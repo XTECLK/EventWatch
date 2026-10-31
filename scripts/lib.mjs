@@ -57,7 +57,7 @@ export function openUrl(url) {
 // Stages the site into public/ (gitignored): the static files plus config.json,
 // made from .eventwatch/app.json with only what the browser needs. Files are
 // overwritten in place so host links saved in public/ (.vercel, .netlify) survive.
-export const SITE_FILES = ["index.html", "style.css", "script.js", "config.js", "assets"];
+export const SITE_FILES = ["index.html", "style.css", "script.js", "i18n.js", "config.js", "assets"];
 export const PUBLIC_DIR = `${ROOT}public`;
 
 export async function buildPublic() {

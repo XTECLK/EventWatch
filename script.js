@@ -4,7 +4,7 @@
  */
 
 let state = {
-    flags: { 'EventName': 'පූරණය වෙමින්...', 'EventStatus': 'PENDING' },
+    flags: { 'EventName': '', 'EventStatus': 'PENDING' },
     events: []
 };
 let statusInterval = null;
@@ -12,6 +12,8 @@ let statusInterval = null;
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    setLanguage();
+    applyStaticTranslations();
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('fullscreen') === 'true') {
         const fsOverlay = document.getElementById('fullscreen-overlay');
@@ -76,6 +78,8 @@ async function startDataLoop() {
 // --- RENDERING ---
 function render() {
     const f = state.flags;
+    setLanguage(f.Language);
+    applyStaticTranslations();
 
     // Initial reveal transition
     const loader = document.getElementById('loading-area');
@@ -124,9 +128,9 @@ function render() {
         const bannerTextElement = document.getElementById('whatsapp-banner-text');
         if (bannerTextElement) {
             if (wLink.toLowerCase().includes('/channel/')) {
-                bannerTextElement.textContent = 'WhatsApp චැනලයට එක්වන්න';
+                bannerTextElement.textContent = t('joinChannel');
             } else {
-                bannerTextElement.textContent = 'WhatsApp සමූහයට එක්වන්න';
+                bannerTextElement.textContent = t('joinGroup');
             }
         }
     }
@@ -155,7 +159,7 @@ function render() {
 
         const target = new Date(`${date}T${paddedTime}`);
         if (isNaN(target.getTime())) {
-            document.getElementById('status-container').innerHTML = '<div class="empty-state">දිනය නිවැරදි නැත</div>';
+            document.getElementById('status-container').innerHTML = `<div class="empty-state">${t('invalidDate')}</div>`;
         } else {
             updateCountdown(target);
         }
@@ -181,12 +185,12 @@ function updateCountdown(target) {
         const s = Math.floor((diff / 1000) % 60);
 
         el.innerHTML = `
-            <div class="status-label">උත්සවය ආරම්භ වීමට තව</div>
+            <div class="status-label">${t('startsIn')}</div>
             <div id="countdown" class="countdown">
-                <div class="countdown-item"><span class="countdown-value">${d}</span><span class="countdown-label">දින</span></div>
-                <div class="countdown-item"><span class="countdown-value">${h}</span><span class="countdown-label">පැය</span></div>
-                <div class="countdown-item"><span class="countdown-value">${m}</span><span class="countdown-label">මිනිත්තු</span></div>
-                <div class="countdown-item"><span class="countdown-value">${s}</span><span class="countdown-label">තත්පර</span></div>
+                <div class="countdown-item"><span class="countdown-value">${d}</span><span class="countdown-label">${t('days')}</span></div>
+                <div class="countdown-item"><span class="countdown-value">${h}</span><span class="countdown-label">${t('hours')}</span></div>
+                <div class="countdown-item"><span class="countdown-value">${m}</span><span class="countdown-label">${t('minutes')}</span></div>
+                <div class="countdown-item"><span class="countdown-value">${s}</span><span class="countdown-label">${t('seconds')}</span></div>
             </div>
         `;
     };
@@ -216,17 +220,17 @@ function renderLists() {
     const finishedEvents = [];
 
     state.events.forEach(e => {
-        const s = (e.Status || e.status || '').toLowerCase().trim();
+        const s = statusKey(e.Status || e.status);
 
-        if (s === 'on going' || s === 'up next') {
+        if (s === 'ongoing' || s === 'upnext') {
             const item = document.createElement('div');
             item.className = 'event-item';
             const loc = (e.Location || e.location || '').trim();
-            const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
+            const locationText = loc ? loc : t('locationTbd');
             item.innerHTML = `<div class="event-info"><h3>${e.Event || e.event}</h3><p>${locationText}</p></div>`;
 
-            if (s === 'on going') oList.appendChild(item);
-            else if (s === 'up next') uList.appendChild(item);
+            if (s === 'ongoing') oList.appendChild(item);
+            else uList.appendChild(item);
         } else if (s === 'finished') {
             let places = parseInt(e.Places || e.places || '3', 10);
             if (isNaN(places)) places = 3;
@@ -262,18 +266,18 @@ function renderLists() {
 
         let resHtml = '';
         if (places === 0) {
-            resHtml = `<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 1rem 0;">ජයග්‍රාහකයින් තෝරා නොගැනේ</div>`;
+            resHtml = `<div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; text-align: center; padding: 1rem 0;">${t('noWinners')}</div>`;
         } else if (places === 1) {
-            first = first || 'තේරී නැත';
+            first = first || t('notSelected');
             resHtml = `<div class="results-container">
                 <div class="result-item">
                     <span style="font-size: 1.25rem;">🥇</span> <span class="result-text">${first}</span>
                 </div>
             </div>`;
         } else {
-            first = first || 'තේරී නැත';
-            second = second || 'තේරී නැත';
-            third = third || 'තේරී නැත';
+            first = first || t('notSelected');
+            second = second || t('notSelected');
+            third = third || t('notSelected');
             resHtml = `<div class="results-container">
                 <div class="result-item">
                     <span style="font-size: 1.25rem;">🥇</span>
@@ -305,8 +309,8 @@ function renderLists() {
     const emptyStateHtml = `
         <div class="event-item empty-state-card" style="border-bottom: none; opacity: 0.7;">
             <div class="event-info">
-                <h3>සිදුවීම් නොමැත</h3>
-                <p>අප හා රැඳී සිටින්න</p>
+                <h3>${t('noEvents')}</h3>
+                <p>${t('stayTuned')}</p>
             </div>
         </div>`;
 
@@ -317,17 +321,17 @@ function renderLists() {
 
 function renderAgenda() {
     const c = document.getElementById('agenda-content'); if (!c) return;
-    const m = { 'Pending': 'පැවැත්වීමට නියමිත', 'Up Next': 'මීලගට', 'On Going': 'දැන් පැවැත්වේ', 'Finished': 'නිම විය', 'Cancelled': 'අවලංගුයි' };
+    const m = { 'pending': t('statusPending'), 'upnext': t('statusUpNext'), 'ongoing': t('statusOngoing'), 'finished': t('statusFinished'), 'cancelled': t('statusCancelled') };
     c.innerHTML = `<div class="list-centered">${state.events.map((e, idx) => {
-        const s = (e.Status || e.status || '').toLowerCase().trim().replace(' ', '-');
+        const s = statusKey(e.Status || e.status);
         const loc = (e.Location || e.location || '').trim();
-        const locationText = loc ? loc : 'ස්ථානය පසුවට දැනුම් දේ';
+        const locationText = loc ? loc : t('locationTbd');
 
         let statusHtml = '';
         if (s === 'finished') {
-            statusHtml = `<button class="btn btn-outline btn-results" style="height: 28px; font-size: 0.75rem; padding: 0 1rem; border-radius: 99px; min-height: auto; display: inline-flex; align-items: center; gap: 4px;" data-idx="${idx}">ප්‍රතිඵල <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>`;
+            statusHtml = `<button class="btn btn-outline btn-results" style="height: 28px; font-size: 0.75rem; padding: 0 1rem; border-radius: 99px; min-height: auto; display: inline-flex; align-items: center; gap: 4px;" data-idx="${idx}">${t('results')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>`;
         } else {
-            statusHtml = `<span class="event-status status-${s}">${m[e.Status || e.status] || (e.Status || e.status)}</span>`;
+            statusHtml = `<span class="event-status status-${STATUS_CLASS[s] || s}">${m[s] || (e.Status || e.status)}</span>`;
         }
 
         return `
@@ -352,10 +356,10 @@ function renderAgenda() {
             if (resDiv.style.display === 'none') {
                 resDiv.innerHTML = generateResultsHtml(state.events[idx]);
                 resDiv.style.display = 'block';
-                btn.innerHTML = `ප්‍රතිඵල <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+                btn.innerHTML = `${t('results')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
             } else {
                 resDiv.style.display = 'none';
-                btn.innerHTML = `ප්‍රතිඵල <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                btn.innerHTML = `${t('results')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
             }
         };
     });
@@ -370,13 +374,13 @@ function generateResultsHtml(e) {
     let third = (e['3rd'] || '').trim();
 
     if (places === 0) {
-        return `<div style="color: var(--text-muted); font-style: italic; text-align: center;">මෙම තරගය සඳහා ජයග්‍රාහකයින් තෝරා නොගැනේ.</div>`;
+        return `<div style="color: var(--text-muted); font-style: italic; text-align: center;">${t('noWinnersDot')}</div>`;
     } else if (places === 1) {
-        return `<div style="font-weight: 700; color: #16a34a; text-align: center;">🥇 ජයග්‍රාහකයා: <span style="color: var(--text-main); font-weight: 600;">${first || 'තේරී නැත'}</span></div>`;
+        return `<div style="font-weight: 700; color: #16a34a; text-align: center;">🥇 ${t('winner')}: <span style="color: var(--text-main); font-weight: 600;">${first || t('notSelected')}</span></div>`;
     } else {
-        let html = `<div style="font-weight: 700; color: #16a34a; margin-bottom: 0.25rem;">🥇 ප්‍රථම ස්ථානය: <span style="color: var(--text-main); font-weight: 600;">${first || 'තේරී නැත'}</span></div>`;
-        if (places >= 2) html += `<div style="font-weight: 700; color: #2563eb; margin-bottom: 0.25rem;">🥈 දෙවන ස්ථානය: <span style="color: var(--text-main); font-weight: 600;">${second || 'තේරී නැත'}</span></div>`;
-        if (places >= 3) html += `<div style="font-weight: 700; color: #ca8a04;">🥉 තෙවන ස්ථානය: <span style="color: var(--text-main); font-weight: 600;">${third || 'තේරී නැත'}</span></div>`;
+        let html = `<div style="font-weight: 700; color: #16a34a; margin-bottom: 0.25rem;">🥇 ${t('first')}: <span style="color: var(--text-main); font-weight: 600;">${first || t('notSelected')}</span></div>`;
+        if (places >= 2) html += `<div style="font-weight: 700; color: #2563eb; margin-bottom: 0.25rem;">🥈 ${t('second')}: <span style="color: var(--text-main); font-weight: 600;">${second || t('notSelected')}</span></div>`;
+        if (places >= 3) html += `<div style="font-weight: 700; color: #ca8a04;">🥉 ${t('third')}: <span style="color: var(--text-main); font-weight: 600;">${third || t('notSelected')}</span></div>`;
         return html;
     }
 }
@@ -409,6 +413,12 @@ function parseCsv(text) {
     return lines.slice(1).map(values =>
         headers.reduce((obj, h, i) => { obj[h] = (values[i] || '').trim(); return obj; }, {}));
 }
+
+// 'On Going', 'on-going', 'ongoing' -> 'ongoing' (same for 'Up Next', etc.)
+function statusKey(raw) {
+    return (raw || '').toString().toLowerCase().replace(/[\s_-]/g, '');
+}
+const STATUS_CLASS = { ongoing: 'on-going', upnext: 'up-next' };
 
 function parseParams(data) {
     const flags = {};

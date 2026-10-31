@@ -6,73 +6,98 @@ function onSheetOpen() {
       .addToUi();
 }
 
+// Message texts per language (the sheet's Flags tab "Language": en | si).
+const MESSAGES = {
+  en: {
+    selectRow: 'Please select a row.',
+    selectDataRow: 'Please select a data row, not the header.',
+    unknown: 'Unknown', locationTbd: 'Location to be announced', notSelected: 'Not selected',
+    resultsTitle: '🏆 *Results:*', event: '🏃 *Event:*', location: '📍 *Location:*',
+    noWinners: 'No winners are selected for this event.',
+    winner: '🥇 *Winner:*', first: '🥇 *1st place:*', second: '🥈 *2nd place:*', third: '🥉 *3rd place:*',
+    cancelledTitle: '🚫 *Event cancelled:*', cancelledBody: 'Please note that this event has been cancelled.',
+    ongoingTitle: '🔥 *Happening now:*', ongoingBody: 'This event has started.',
+    pendingTitle: '📢 *Announcement:*', pendingBody: 'Participants, please report immediately.',
+    opening: 'Opening WhatsApp...', openingHint: 'If it does not open automatically, press the button below.',
+    open: 'Open WhatsApp', dialog: 'Send WhatsApp Notification'
+  },
+  si: {
+    selectRow: 'කරුණාකර පේළියක් තෝරන්න.',
+    selectDataRow: 'කරුණාකර දත්ත පේළියක් තෝරන්න (ශීර්ෂය නොවේ).',
+    unknown: 'නොදනී', locationTbd: 'ස්ථානය පසුවට දැනුම් දේ', notSelected: 'තේරී නැත',
+    resultsTitle: '🏆 *තරග ප්‍රතිඵල:*', event: '🏃 *තරගය:*', location: '📍 *ස්ථානය:*',
+    noWinners: 'මෙම තරගය සඳහා ජයග්‍රාහකයින් තෝරා නොගැනේ.',
+    winner: '🥇 *ජයග්‍රාහකයා:*', first: '🥇 *ප්‍රථම ස්ථානය:*', second: '🥈 *දෙවන ස්ථානය:*', third: '🥉 *තෙවන ස්ථානය:*',
+    cancelledTitle: '🚫 *තරගය අවලංගු කර ඇත:*', cancelledBody: 'මෙම තරගය අවලංගු කර ඇති බව කරුණාවෙන් සලකන්න.',
+    ongoingTitle: '🔥 *දැන් පැවැත්වේ:*', ongoingBody: 'මෙම තරගය මේ වන විට ආරම්භ වී ඇත.',
+    pendingTitle: '📢 *දැනුම්දීමයි:*', pendingBody: 'කරුණාකර අදාල තරගකරුවන් වහාම වාර්තා කරන්න.',
+    opening: 'WhatsApp විවෘත වෙමින් පවතී...', openingHint: 'එය ස්වයංක්‍රීයව විවෘත නොවන්නේ නම්, පහත බොත්තම ඔබන්න.',
+    open: 'WhatsApp විවෘත කරන්න', dialog: 'WhatsApp පණිවිඩය යවන්න'
+  }
+};
+
+function getLanguage_(ss) {
+  const flags = ss.getSheetByName('Flags');
+  if (flags) {
+    const rows = flags.getDataRange().getValues();
+    for (let i = 0; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === 'Language') {
+        const code = String(rows[i][1]).trim().toLowerCase();
+        if (MESSAGES[code]) return code;
+      }
+    }
+  }
+  return 'si';
+}
+
 function sendWhatsAppMessage() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const L = MESSAGES[getLanguage_(ss)];
+  const sheet = ss.getActiveSheet();
   const range = sheet.getActiveRange();
-  
+
   if (!range) {
-    SpreadsheetApp.getUi().alert('කරුණාකර පේළියක් තෝරන්න (Please select a row).');
+    SpreadsheetApp.getUi().alert(L.selectRow);
     return;
   }
-  
+
   const rowIndex = range.getRow();
-  
-  // Exclude header row if clicked accidentally
   if (rowIndex === 1) {
-    SpreadsheetApp.getUi().alert('කරුණාකර දත්ත පේළියක් තෝරන්න (Please select a data row, not the header).');
+    SpreadsheetApp.getUi().alert(L.selectDataRow);
     return;
   }
-  
-  // Get columns A to G (1 to 7) for the selected row
+
+  // Columns A-G: Event, Location, Status, Places, 1st, 2nd, 3rd
   const rowData = sheet.getRange(rowIndex, 1, 1, 7).getValues()[0];
-  
-  // A - EventName (Index 0)
-  const eventName = String(rowData[0] || '').trim() || 'නොදනී';
-  // B - Location (Index 1)
-  const location = String(rowData[1] || '').trim() || 'ස්ථානය පසුවට දැනුම් දේ';
-  // C - Status (Index 2)
-  const status = String(rowData[2] || '').toLowerCase().trim();
-  // D - Places (Index 3)
-  const placesRaw = String(rowData[3] || '').trim();
-  let places = parseInt(placesRaw, 10);
+  const eventName = String(rowData[0] || '').trim() || L.unknown;
+  const location = String(rowData[1] || '').trim() || L.locationTbd;
+  const status = String(rowData[2] || '').toLowerCase().replace(/[\s_-]/g, '');
+  let places = parseInt(String(rowData[3] || '').trim(), 10);
   if (isNaN(places)) places = 3;
-  
-  // E - 1st place (Index 4)
-  let first = String(rowData[4] || '').trim();
-  // F - 2nd place (Index 5)
-  let second = String(rowData[5] || '').trim();
-  // G - 3rd place (Index 6)
-  let third = String(rowData[6] || '').trim();
-  
+  const first = String(rowData[4] || '').trim() || L.notSelected;
+  const second = String(rowData[5] || '').trim() || L.notSelected;
+  const third = String(rowData[6] || '').trim() || L.notSelected;
+
   let resText = '';
-  
-  // Logic mimicking script.js
   if (status === 'finished') {
-    resText = `🏆 *තරග ප්‍රතිඵල:*\n\n🏃 *තරගය:* ${eventName}\n`;
-    
+    resText = `${L.resultsTitle}\n\n${L.event} ${eventName}\n`;
     if (places === 0) {
-      resText += `\nමෙම තරගය සඳහා ජයග්‍රාහකයින් තෝරා නොගැනේ.`;
+      resText += `\n${L.noWinners}`;
     } else if (places === 1) {
-      first = first || 'තේරී නැත';
-      resText += `\n🥇 *ජයග්‍රාහකයා:* ${first}`;
+      resText += `\n${L.winner} ${first}`;
     } else {
-      first = first || 'තේරී නැත';
-      second = second || 'තේරී නැත';
-      third = third || 'තේරී නැත';
-      resText += `\n🥇 *ප්‍රථම ස්ථානය:* ${first}`;
-      if (places >= 2) resText += `\n🥈 *දෙවන ස්ථානය:* ${second}`;
-      if (places >= 3) resText += `\n🥉 *තෙවන ස්ථානය:* ${third}`;
+      resText += `\n${L.first} ${first}`;
+      if (places >= 2) resText += `\n${L.second} ${second}`;
+      if (places >= 3) resText += `\n${L.third} ${third}`;
     }
   } else if (status === 'cancelled') {
-    resText = `🚫 *තරගය අවලංගු කර ඇත:*\n\n🏃 *තරගය:* ${eventName}\n\nමෙම තරගය අවලංගු කර ඇති බව කරුණාවෙන් සලකන්න.`;
-  } else if (status === 'on going' || status === 'ongoing') {
-    // New On Going Message Format
-    resText = `🔥 *දැන් පැවැත්වේ:*\n\n🏃 *තරගය:* ${eventName}\n📍 *ස්ථානය:* ${location}\n\nමෙම තරගය මේ වන විට ආරම්භ වී ඇත.`;
+    resText = `${L.cancelledTitle}\n\n${L.event} ${eventName}\n\n${L.cancelledBody}`;
+  } else if (status === 'ongoing') {
+    resText = `${L.ongoingTitle}\n\n${L.event} ${eventName}\n${L.location} ${location}\n\n${L.ongoingBody}`;
   } else {
-    // Default / Pending Message Format
-    resText = `📢 *දැනුම්දීමයි:*\n\n🏃 *තරගය:* ${eventName}\n📍 *ස්ථානය:* ${location}\n\nකරුණාකර අදාල තරගකරුවන් වහාම වාර්තා කරන්න.`;
+    resText = `${L.pendingTitle}\n\n${L.event} ${eventName}\n${L.location} ${location}\n\n${L.pendingBody}`;
   }
-  
+
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(resText)}`;
   
   // Use a modal dialog to safely open the WhatsApp link
@@ -99,9 +124,9 @@ function sendWhatsAppMessage() {
         </style>
       </head>
       <body>
-        <h3>WhatsApp විවෘත වෙමින් පවතී...</h3>
-        <p>එය ස්වයංක්‍රීයව විවෘත නොවන්නේ නම්, පහත බොත්තම ඔබන්න.</p>
-        <a href="${whatsappUrl}" class="btn" target="_blank" onclick="setTimeout(function(){ google.script.host.close(); }, 1000);">Open WhatsApp</a>
+        <h3>${L.opening}</h3>
+        <p>${L.openingHint}</p>
+        <a href="${whatsappUrl}" class="btn" target="_blank" onclick="setTimeout(function(){ google.script.host.close(); }, 1000);">${L.open}</a>
         <script>
           // Attempt to open immediately
           window.open("${whatsappUrl}", "_blank");
@@ -114,7 +139,7 @@ function sendWhatsAppMessage() {
     .setWidth(400)
     .setHeight(200);
     
-  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Send WhatsApp Notification');
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, L.dialog);
 }
 
 // Installed as the sheet's onEdit trigger by createDashboardSheet_().
@@ -198,9 +223,10 @@ function initDashboard_(title) {
   const flags = ss.getSheets()[0].setName('Flags');
   flags.getRange(1, 1, 1, 2).setValues([['Key', 'Value']]).setFontWeight('bold');
   const start = new Date(Date.now() + 24 * 3600 * 1000);
-  flags.getRange(2, 1, 8, 2).setValues([
+  flags.getRange(2, 1, 9, 2).setValues([
     ['EventName', title || 'My Event 2026'],
     ['EventSubtext', 'Live event dashboard'],
+    ['Language', 'en'], // en | si
     ['EventStatus', 'PENDING'], // PENDING | ON_GOING | FINISHED
     ['EventStartDate', Utilities.formatDate(start, ss.getSpreadsheetTimeZone(), 'yyyy-MM-dd')],
     ['EventStartTime', '09:00:00'],
@@ -213,14 +239,15 @@ function initDashboard_(title) {
   const events = ss.insertSheet('Events');
   const headers = ['Event', 'Location', 'Status', 'Places', '1st', '2nd', '3rd', 'EndedTime'];
   events.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
-  events.getRange(2, 1, 3, 4).setValues([
-    ['100m Sprint', 'Main Ground', 'pending', 3],
-    ['Long Jump', 'Sand Pit', 'ongoing', 3],
-    ['Relay', 'Main Ground', 'cancelled', 3]
+  events.getRange(2, 1, 4, 4).setValues([
+    ['100m Sprint', 'Main Ground', 'Up Next', 3],
+    ['Long Jump', 'Sand Pit', 'On Going', 3],
+    ['Relay', 'Main Ground', 'Pending', 3],
+    ['High Jump', 'Sand Pit', 'Cancelled', 3]
   ]);
   events.getRange(2, 3, 200, 1).setDataValidation(
     SpreadsheetApp.newDataValidation()
-      .requireValueInList(['pending', 'ongoing', 'finished', 'cancelled'], true).build());
+      .requireValueInList(['Pending', 'Up Next', 'On Going', 'Finished', 'Cancelled'], true).build());
   events.setFrozenRows(1);
   events.autoResizeColumns(1, headers.length);
 
