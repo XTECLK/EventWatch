@@ -9,7 +9,6 @@
     "setup": "node scripts/setup.mjs",
     "google:create": "node scripts/google-app.mjs create",
     "google:update": "node scripts/google-app.mjs update",
-    "google:new-sheet": "node scripts/google-app.mjs new-sheet",
     "deploy": "node scripts/deploy.mjs"
   },
   "devDependencies": {

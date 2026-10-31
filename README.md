@@ -22,18 +22,18 @@ npm run setup
 
 `npm run setup` will:
 1. Log you into Google through [`clasp`](https://github.com/google/clasp) (browser window).
-2. Create a standalone Apps Script project (`google/`), deploy it as a web app.
-3. Open the script editor so you can run `authorize` once (Google requires this click), then call the web app, which **creates the Google Sheet** (with `Flags` and `Events` tabs and sample data), shares it view-only by link and installs the sheet's menu/triggers.
-4. Save everything it learned, and the frontend config, to `.eventwatch/app.json` (script ID, deployment ID, web app URL, sheet ID/URL, tab names, refresh). It is gitignored, so each fork gets its own; the site reads the generated `public/config.json`.
+2. Create a Google Sheet with the Apps Script (`google/`) **attached to it**, and push the code. The script can only touch that one spreadsheet (permissions: that sheet + its menu), nothing else in your Drive.
+3. Open the sheet. On first open it fills itself with the `Flags` and `Events` tabs and sample data. You click **Share → Anyone with the link → Viewer** once (the site reads the sheet as public CSV), then press Enter; setup checks it can read it.
+4. Save the IDs and frontend config to `.eventwatch/app.json` (script ID, sheet ID/URL, tab names, refresh). It is gitignored, so each fork gets its own; the site reads the generated `public/config.json`.
 5. Deploy the frontend to Vercel or Netlify (or skip and use `npm start`).
 
-Afterwards: `npm run google:update` pushes script changes to the same deployment, and `npm run deploy` redeploys the frontend. `npm run google:new-sheet` makes a fresh sheet with the current sample data and points the site at it (the old sheet stays in your Drive). Updating the script never changes a sheet that already exists.
+Afterwards: `npm run google:update` pushes script changes to the sheet's script (reload the sheet to use them), and `npm run deploy` redeploys the frontend. Updating the script never changes data already in the sheet.
 
-The website never writes to the sheet. It only fetches the sheet as CSV and displays it; you edit the sheet directly. The Apps Script web app is used only at setup time.
+The website never writes to the sheet. It only fetches the sheet as CSV and displays it; you edit the sheet directly.
 
 ## Sheet structure
 
-The sheet is read as CSV, so it must be shared as **Anyone with the link → Viewer** (setup does this).
+The sheet is read as CSV, so it must be shared as **Anyone with the link → Viewer** (you do this once during setup).
 
 ### `Flags` tab - key/value settings (column A = key, column B = value)
 
@@ -76,7 +76,7 @@ Keep the header row exactly as above. The Apps Script relies on column positions
 ```
 
 - `refresh` - polling interval in ms.
-- The other fields (`scriptId`, `deploymentId`, `url`, `sheetUrl`) are used by the setup tooling.
+- The other fields (`scriptId`, `sheetUrl`) are used by the setup tooling.
 
 ## URL parameters
 
@@ -89,9 +89,9 @@ Keep the header row exactly as above. The Apps Script relies on column positions
 
 ## Manual setup (without the scripts)
 
-1. Create a Google Sheet with `Flags` and `Events` tabs as described above, and share it "Anyone with the link → Viewer".
+1. Create a Google Sheet (with `google/Code.js` in Extensions → Apps Script it creates the `Flags` and `Events` tabs on first open, or add them yourself as described above) and share it "Anyone with the link → Viewer".
 2. Put the site files in a folder with a `config.json` containing at least `{ "sheetId": "<your sheet id>" }`.
-3. Host the folder on any static host (or `npm start`). The menu and auto-timestamp in `google/Code.js` are optional; paste it into the sheet's Apps Script editor and rename `onSheetOpen`/`onSheetEdit` to `onOpen`/`onEdit` to use them.
+3. Host the folder on any static host (or `npm start`). The menu and auto-timestamp in `google/Code.js` are optional; paste it into a new sheet's Extensions → Apps Script editor and reload; it fills in the tabs for you.
 
 ## Customizing
 
@@ -105,7 +105,7 @@ index.html / style.css / script.js   frontend
 i18n.js                              English / Sinhala labels
 config.js                            loads config.json (generated into public/)
 public/                              staged site that gets deployed (generated, gitignored)
-google/                              Apps Script web app (creates the sheet; menu, WhatsApp share, auto timestamps)
+google/                              Apps Script attached to the sheet (first-open sample data, WhatsApp menu, finish-time stamp)
 scripts/                             setup, google-app (clasp) and deploy tooling
 .eventwatch/app.json                 IDs + frontend config (created by setup, gitignored)
 ```
@@ -114,5 +114,5 @@ scripts/                             setup, google-app (clasp) and deploy toolin
 
 - **Page stuck on loading**: the sheet isn't shared as "Anyone with the link", `sheetId` in `public/config.json` is wrong, or a tab name differs from it.
 - **`clasp create` fails with "Apps Script API has not been used"**: enable it at <https://script.google.com/home/usersettings>.
-- **Setup says "Not authorized yet"**: in the script editor run `authorize` and accept (Advanced → Go to project), then press Enter again.
+- **Setup says it can't read the Flags tab**: reload the sheet so it fills itself in, and check Share → General access is "Anyone with the link".
 - **Menu missing in the sheet**: reload the spreadsheet.

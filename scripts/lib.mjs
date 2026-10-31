@@ -10,7 +10,7 @@ export const STATE_FILE = `${STATE_DIR}/app.json`;
 
 export const exists = (file) => access(file).then(() => true, () => false);
 
-// Everything the tooling learns (script ID, deployment, web app URL, sheet ID).
+// Everything the tooling learns (script ID, sheet ID and URL).
 export async function readState() {
   try { return JSON.parse(await readFile(STATE_FILE, "utf8")); } catch { return null; }
 }

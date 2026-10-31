@@ -1,5 +1,7 @@
-// Installed as the sheet's onOpen trigger by createDashboardSheet_().
-function onSheetOpen() {
+// Simple trigger: runs when the sheet is opened. The first time, it fills an
+// empty spreadsheet with the Flags and Events tabs and sample data.
+function onOpen() {
+  ensureInitialized_();
   SpreadsheetApp.getUi()
       .createMenu('EventWatch')
       .addItem('Send WhatsApp Message', 'sendWhatsAppMessage')
@@ -142,8 +144,8 @@ function sendWhatsAppMessage() {
   SpreadsheetApp.getUi().showModalDialog(htmlOutput, L.dialog);
 }
 
-// Installed as the sheet's onEdit trigger by createDashboardSheet_().
-function onSheetEdit(e) {
+// Simple trigger: stamps the finish time when an event's Status becomes Finished.
+function onEdit(e) {
   if (!e) return;
   const range = e.range;
   const sheet = range.getSheet();
@@ -167,65 +169,20 @@ function onSheetEdit(e) {
 
 
 /**
- * Web app API, called by scripts/google-app.mjs at setup time. JSON POST
- * { action }. No secret is needed: `init` only creates the sheet once and then
- * just returns the (public, view-only) sheet's id; nothing else is writable.
- *
- *   ping   -> { ok: true }
- *   init   -> creates the dashboard spreadsheet (once) and returns its id;
- *             with force:true always makes a new one (the old stays in Drive)
+ * Creates the Flags and Events tabs with sample data if they don't exist yet.
+ * Runs from the onOpen simple trigger, so it needs no extra permissions
+ * beyond this one spreadsheet.
  */
-function doPost(e) {
-  let body = {};
-  try { body = JSON.parse(e.postData.contents); } catch (err) { /* handled below */ }
-  try {
-    if (body.action === 'ping') return json_({ ok: true });
-    if (body.action === 'init') return json_(Object.assign({ ok: true }, initDashboard_(body.title, body.force === true)));
-    return json_({ ok: false, error: 'Unknown action' });
-  } catch (err) {
-    return json_({ ok: false, error: String(err) });
-  }
-}
+function ensureInitialized_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (ss.getSheetByName('Flags') && ss.getSheetByName('Events')) return;
 
-function doGet() { return json_({ ok: true, service: 'EventWatch' }); }
-
-function json_(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * Run once from the Apps Script editor to approve the script's access to
- * Sheets, Drive and triggers. (Google only lets you do this by hand.)
- */
-function authorize() {
-  SpreadsheetApp.getActiveSpreadsheet();
-  DriveApp.getRootFolder();
-  ScriptApp.getProjectTriggers();
-  Logger.log('Authorized. Return to the terminal and press Enter.');
-}
-
-/**
- * Creates the spreadsheet with Flags and Events tabs and sample data, shares
- * it as view-only for anyone with the link, and installs the menu and
- * finish-time triggers. Idempotent: reuses the sheet remembered in the
- * script properties.
- */
-function initDashboard_(title, force) {
-  const props = PropertiesService.getScriptProperties();
-  const existing = props.getProperty('SHEET_ID');
-  if (existing && !force) {
-    try {
-      const ss = SpreadsheetApp.openById(existing);
-      return { sheetId: existing, sheetUrl: ss.getUrl(), created: false };
-    } catch (err) { /* deleted: make a new one */ }
-  }
-
-  const ss = SpreadsheetApp.create(title || 'EventWatch');
-  const flags = ss.getSheets()[0].setName('Flags');
+  const flags = ss.getSheetByName('Flags') || ss.insertSheet('Flags');
+  flags.clear();
   flags.getRange(1, 1, 1, 2).setValues([['Key', 'Value']]).setFontWeight('bold');
   const start = new Date(Date.now() + 24 * 3600 * 1000);
   flags.getRange(2, 1, 9, 2).setValues([
-    ['EventName', title || 'My Event 2026'],
+    ['EventName', ss.getName()],
     ['EventSubtext', 'Live event dashboard'],
     ['Language', 'en'], // en | si
     ['EventStatus', 'PENDING'], // PENDING | ON_GOING | FINISHED
@@ -239,7 +196,8 @@ function initDashboard_(title, force) {
   flags.getRange('B5').setDataValidation(dropdown_(['PENDING', 'ON_GOING', 'FINISHED'])); // EventStatus
   flags.autoResizeColumns(1, 2);
 
-  const events = ss.insertSheet('Events');
+  const events = ss.getSheetByName('Events') || ss.insertSheet('Events');
+  events.clear();
   const headers = ['Event', 'Location', 'Status', 'Places', '1st', '2nd', '3rd', 'EndedTime'];
   events.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
   events.getRange(2, 1, 4, 4).setValues([
@@ -253,12 +211,10 @@ function initDashboard_(title, force) {
   events.setFrozenRows(1);
   events.autoResizeColumns(1, headers.length);
 
-  DriveApp.getFileById(ss.getId()).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  ScriptApp.newTrigger('onSheetOpen').forSpreadsheet(ss).onOpen().create();
-  ScriptApp.newTrigger('onSheetEdit').forSpreadsheet(ss).onEdit().create();
-
-  props.setProperty('SHEET_ID', ss.getId());
-  return { sheetId: ss.getId(), sheetUrl: ss.getUrl(), created: true };
+  // Remove the blank default sheet that came with the new spreadsheet
+  const blank = ss.getSheetByName('Sheet1');
+  if (blank && ss.getSheets().length > 2 && blank.getLastRow() === 0) ss.deleteSheet(blank);
+  ss.setActiveSheet(events);
 }
 
 function dropdown_(values) {
